@@ -16,15 +16,15 @@ export function Button({
   ...props
 }: ButtonProps) {
   const base =
-    "inline-flex items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-medium transition-opacity focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] disabled:opacity-50 disabled:cursor-not-allowed";
+    "inline-flex items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-medium transition-opacity focus:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50 disabled:cursor-not-allowed";
 
   const variants = {
     primary:
-      "bg-[var(--color-primary)] text-[var(--color-primary-foreground)] hover:opacity-90",
+      "bg-primary text-primary-foreground hover:opacity-90",
     secondary:
-      "bg-[var(--color-secondary)] text-[var(--color-secondary-foreground)] hover:opacity-90",
+      "bg-secondary text-secondary-foreground hover:opacity-90",
     ghost:
-      "bg-transparent text-[var(--color-foreground)] hover:bg-[var(--color-muted)]",
+      "bg-transparent text-foreground hover:bg-muted",
   };
 
   return (

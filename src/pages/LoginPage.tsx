@@ -7,6 +7,15 @@ import { Input } from "../components/ui/Input";
 import { Button } from "../components/ui/Button";
 import texts from "../config/texts.json";
 
+function applyPhoneMask(value: string): string {
+  const digits = value.replace(/\D/g, "").slice(0, 11);
+  if (digits.length <= 2) return digits.length ? `(${digits}` : "";
+  if (digits.length <= 6) return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
+  if (digits.length <= 10)
+    return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`;
+  return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
+}
+
 export function LoginPage() {
   const navigate = useNavigate();
   const { login, isLoading } = useAuthStore();
@@ -14,12 +23,19 @@ export function LoginPage() {
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors, isValid },
   } = useForm<PhoneFormData>({
     resolver: zodResolver(phoneSchema),
-    mode: "onBlur",
-    reValidateMode: "onChange",
+    mode: "onChange",
   });
+
+  const { onChange, ...phoneRegister } = register("phone");
+
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const masked = applyPhoneMask(e.target.value);
+    setValue("phone", masked, { shouldValidate: true });
+  };
 
   const onSubmit = async (data: PhoneFormData) => {
     await login(data.phone);
@@ -77,7 +93,8 @@ export function LoginPage() {
             type="tel"
             placeholder={texts.login.placeholder}
             error={errors.phone?.message}
-            {...register("phone")}
+            onChange={handlePhoneChange}
+            {...phoneRegister}
           />
 
           <Button

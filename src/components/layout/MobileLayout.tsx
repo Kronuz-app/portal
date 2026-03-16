@@ -11,7 +11,7 @@ export function MobileLayout({ children }: MobileLayoutProps) {
 
   return (
     <div
-      className="flex flex-col min-h-screen w-full max-w-screen-xl mx-auto"
+      className="flex flex-col min-h-screen w-full"
       style={{ backgroundColor: "var(--color-background)" }}
     >
       <Header />

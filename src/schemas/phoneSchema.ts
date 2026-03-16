@@ -4,9 +4,7 @@ import texts from '../config/texts.json';
 export const phoneSchema = z.object({
   phone: z
     .string()
-    .regex(/^\d+$/, texts.validacao.apenasNumeros)
-    .min(10, texts.validacao.telefoneMinimo)
-    .max(15, texts.validacao.telefoneMaximo),
+    .regex(/^\(\d{2}\) \d{4,5}-\d{4}$/, texts.validacao.telefoneInvalido),
 });
 
 export type PhoneFormData = z.infer<typeof phoneSchema>;

@@ -43,7 +43,8 @@
   "validacao": {
     "apenasNumeros": "O telefone deve conter apenas números",
     "telefoneMinimo": "O telefone deve ter no mínimo 10 dígitos",
-    "telefoneMaximo": "O telefone deve ter no máximo 15 dígitos"
+    "telefoneMaximo": "O telefone deve ter no máximo 15 dígitos",
+    "telefoneInvalido": "Informe um telefone válido. Ex: (11) 99999-9999"
   },
   "geral": {
     "carregando": "Carregando...",

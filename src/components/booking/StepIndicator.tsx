@@ -6,7 +6,8 @@ interface StepIndicatorProps {
 
 export function StepIndicator({ currentStep, totalSteps, stepLabels }: StepIndicatorProps) {
   return (
-    <div className="flex items-center justify-between w-full px-2 py-3">
+    <div className="flex items-center justify-center w-full px-2 py-3">
+      <div className="flex items-center justify-between w-full max-w-2xl">
       {Array.from({ length: totalSteps }).map((_, index) => {
         const isCompleted = index < currentStep;
         const isActive = index === currentStep;
@@ -35,7 +36,7 @@ export function StepIndicator({ currentStep, totalSteps, stepLabels }: StepIndic
                 )}
               </div>
               <span
-                className="text-[10px] font-medium text-center leading-tight max-w-[56px] truncate"
+                className="text-xs font-medium text-center leading-tight"
                 style={{
                   color: isCompleted || isActive
                     ? 'var(--color-primary)'
@@ -60,6 +61,7 @@ export function StepIndicator({ currentStep, totalSteps, stepLabels }: StepIndic
           </div>
         );
       })}
+      </div>
     </div>
   );
 }

@@ -2,7 +2,8 @@ import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../stores/authStore";
 import { useAppointments } from "../hooks/useAppointments";
 import { MobileLayout } from "../components/layout/MobileLayout";
-import { SkeletonList } from "../components/ui/SkeletonList";
+import { AppointmentSkeleton } from "../components/ui/AppointmentSkeleton";
+import { Skeleton } from "../components/ui/Skeleton";
 import { formatDate, formatTime } from "../lib/utils";
 import type { Appointment } from "../lib/types";
 import texts from "../config/texts.json";
@@ -117,7 +118,12 @@ export function AppointmentsPage() {
       </h1>
 
       {isLoading ? (
-        <SkeletonList count={3} itemClassName="h-24 mb-3 rounded-lg" />
+        <>
+          <Skeleton className="h-5 w-32 mb-3" />
+          <AppointmentSkeleton count={2} />
+          <Skeleton className="h-5 w-28 mb-3 mt-6" />
+          <AppointmentSkeleton count={2} />
+        </>
       ) : (
         <>
           <Section title={t.proximos} appointments={upcoming} clickable={true} />

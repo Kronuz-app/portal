@@ -16,15 +16,15 @@ export function Card({
   className,
 }: CardProps) {
   const base =
-    "rounded-lg bg-[var(--color-card)] text-[var(--color-card-foreground)] p-4 border border-[var(--color-border)]";
+    "rounded-lg bg-card text-card-foreground p-4 border border-border";
 
   const selectable =
     variant === "selectable"
-      ? "cursor-pointer transition-colors hover:border-[var(--color-primary)]"
+      ? "cursor-pointer transition-colors hover:border-primary"
       : "";
 
   const selectedStyle =
-    selected ? "border-[var(--color-primary)] ring-1 ring-[var(--color-primary)]" : "";
+    selected ? "border-primary ring-1 ring-primary" : "";
 
   return (
     <div

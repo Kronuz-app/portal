@@ -37,14 +37,14 @@ export function Dialog({
       />
 
       {/* Panel */}
-      <div className="relative z-10 mx-4 w-full max-w-sm rounded-lg bg-[var(--color-card)] border border-[var(--color-border)] p-6 shadow-xl">
+      <div className="relative z-10 mx-4 w-full max-w-sm rounded-lg bg-card border border-border p-6 shadow-xl">
         <h2
           id="dialog-title"
-          className="mb-2 text-base font-semibold text-[var(--color-card-foreground)]"
+          className="mb-2 text-base font-semibold text-card-foreground"
         >
           {title}
         </h2>
-        <p className="mb-6 text-sm text-[var(--color-muted-foreground)]">{message}</p>
+        <p className="mb-6 text-sm text-muted-foreground">{message}</p>
         <div className="flex gap-3 justify-end">
           <Button variant="ghost" onClick={onCancel}>
             {cancelLabel}
