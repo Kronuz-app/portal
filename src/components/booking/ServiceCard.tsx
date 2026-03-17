@@ -17,7 +17,7 @@ export function ServiceCard({ service, selected, onSelect }: ServiceCardProps) {
           <img
             src={service.image}
             alt={service.name}
-            className="w-24 h-24 sm:w-28 sm:h-28 object-cover shrink-0"
+            className="w-24 sm:w-28 object-cover shrink-0 self-stretch"
           />
         )}
         <div className="flex-1 min-w-0 p-3 flex flex-col justify-between">

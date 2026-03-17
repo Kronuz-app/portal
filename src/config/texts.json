@@ -40,10 +40,17 @@
   "agendamentos": {
     "titulo": "Meus agendamentos",
     "proximos": "Próximos",
-    "anteriores": "Anteriores",
+    "anteriores": "Histórico",
     "cancelar": "Cancelar agendamento",
     "confirmarCancelamento": "Tem certeza que deseja cancelar este agendamento?",
-    "vazio": "Nenhum agendamento encontrado"
+    "justificativaPlaceholder": "Informe o motivo do cancelamento...",
+    "justificativaObrigatoria": "A justificativa é obrigatória para cancelar.",
+    "canceladoComSucesso": "Agendamento cancelado.",
+    "vazio": "Nenhum agendamento encontrado",
+    "vazioProximos": "Você não tem agendamentos futuros",
+    "vazioHistorico": "Nenhum atendimento no histórico",
+    "hoje": "Hoje",
+    "motivoCancelamento": "Motivo do cancelamento"
   },
   "validacao": {
     "apenasNumeros": "O telefone deve conter apenas números",

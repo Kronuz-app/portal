@@ -42,13 +42,20 @@ export async function createAppointment(
     status: "confirmed",
   };
 
+  mockAppointments.push(appointment);
   return appointment;
 }
 
 export async function cancelAppointment(
   appointmentId: string,
+  reason?: string,
   delay = 800
 ): Promise<void> {
   await simulateDelay(delay);
+  const appointment = mockAppointments.find((a) => a.id === appointmentId);
+  if (appointment) {
+    appointment.status = "cancelled";
+    if (reason) appointment.cancelReason = reason;
+  }
   console.log("[appointmentService] cancelAppointment", { appointmentId });
 }

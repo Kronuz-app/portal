@@ -29,7 +29,7 @@ export function StepIndicator({ currentStep, totalSteps, stepLabels }: StepIndic
                     index + 1
                   )}
                 </div>
-                <span className={`text-xs font-medium text-center leading-tight ${highlight ? "text-primary" : "text-muted-foreground"}`}>
+                <span className={`text-xs font-medium text-center leading-tight whitespace-nowrap ${highlight ? "text-primary" : "text-muted-foreground"} ${isActive ? "" : "hidden sm:block"}`}>
                   {stepLabels[index]}
                 </span>
               </div>

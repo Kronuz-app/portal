@@ -44,6 +44,7 @@ export interface Appointment {
   duration: number;
   price: number;
   status: "confirmed" | "cancelled" | "completed";
+  cancelReason?: string;
 }
 
 export interface CreateAppointmentPayload {

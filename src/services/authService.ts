@@ -3,7 +3,7 @@ const simulateDelay = (ms: number): Promise<void> =>
 
 export async function login(phone: string, delay = 800): Promise<string> {
   await simulateDelay(delay);
-  const clientId = `client-${phone}-${Date.now()}`;
+  const clientId = "client-mock-001";
   console.log("[authService] login", { phone, clientId });
   return clientId;
 }
