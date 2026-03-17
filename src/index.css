@@ -2,47 +2,61 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  /* Dark barbershop theme — gold/amber primary on dark background */
-  --primary: 38 92% 50%;
-  --primary-foreground: 20 14% 4%;
+@layer base {
+  :root {
+    --background: 0 0% 7%;
+    --foreground: 0 0% 92%;
 
-  --secondary: 30 6% 20%;
-  --secondary-foreground: 38 92% 50%;
+    --card: 0 0% 10%;
+    --card-foreground: 0 0% 92%;
 
-  --background: 20 14% 4%;
-  --foreground: 40 10% 92%;
+    --popover: 0 0% 10%;
+    --popover-foreground: 0 0% 92%;
 
-  --muted: 30 6% 14%;
-  --muted-foreground: 40 5% 55%;
+    --primary: 43 56% 52%;
+    --primary-foreground: 0 0% 7%;
 
-  --accent: 38 92% 50%;
-  --accent-foreground: 20 14% 4%;
+    --secondary: 0 0% 14%;
+    --secondary-foreground: 0 0% 82%;
 
-  --destructive: 0 72% 51%;
-  --destructive-foreground: 0 0% 98%;
+    --muted: 0 0% 14%;
+    --muted-foreground: 0 0% 55%;
 
-  --border: 30 6% 18%;
-  --input: 30 6% 18%;
-  --ring: 38 92% 50%;
+    --accent: 0 0% 17%;
+    --accent-foreground: 0 0% 92%;
 
-  --card: 20 14% 7%;
-  --card-foreground: 40 10% 92%;
+    --destructive: 350 89% 50%;
+    --destructive-foreground: 0 0% 98%;
 
-  --radius: 0.5rem;
+    --border: 0 0% 18%;
+    --input: 0 0% 18%;
+    --ring: 43 56% 52%;
 
-  /* Named tokens for direct CSS usage */
-  --color-primary: hsl(38, 92%, 50%);
-  --color-primary-foreground: hsl(20, 14%, 4%);
-  --color-secondary: hsl(30, 6%, 20%);
-  --color-secondary-foreground: hsl(38, 92%, 50%);
-  --color-background: hsl(20, 14%, 4%);
-  --color-foreground: hsl(40, 10%, 92%);
-  --color-muted: hsl(30, 6%, 14%);
-  --color-muted-foreground: hsl(40, 5%, 55%);
-  --color-border: hsl(30, 6%, 18%);
-  --color-card: hsl(20, 14%, 7%);
-  --color-card-foreground: hsl(40, 10%, 92%);
-  --color-destructive: hsl(0, 72%, 51%);
-  --color-destructive-foreground: hsl(0, 0%, 98%);
+    --radius: 0.375rem;
+
+    --success: 142 71% 45%;
+    --success-foreground: 210 40% 98%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 228 14% 8%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+
+  h1, h2, h3, h4 {
+    font-family: 'DM Serif Display', serif;
+  }
+}
+
+@layer utilities {
+  .font-display {
+    font-family: 'DM Serif Display', serif;
+  }
 }

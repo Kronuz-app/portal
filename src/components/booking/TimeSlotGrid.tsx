@@ -11,50 +11,31 @@ interface TimeSlotGridProps {
 }
 
 export function TimeSlotGrid({ slots, selectedTime, onSelect, isLoading }: TimeSlotGridProps) {
-  if (isLoading) {
-    return (
-      <div className="grid grid-cols-3 gap-2">
-        <SkeletonList count={9} itemClassName="h-10 rounded-lg" />
-      </div>
-    );
-  }
+  if (isLoading) return <div className="grid grid-cols-3 gap-2"><SkeletonList count={9} itemClassName="h-10 rounded-lg" /></div>;
 
-  const availableSlots = slots.filter((s) => s.available);
-
-  if (availableSlots.length === 0) {
-    return (
-      <p className="text-sm text-center py-4" style={{ color: 'var(--color-muted-foreground)' }}>
-        {texts.booking.dataHorario.semHorarios}
-      </p>
-    );
-  }
+  const available = slots.filter((s) => s.available);
+  if (available.length === 0) return <p className="text-sm text-center py-4 text-muted-foreground">{texts.booking.dataHorario.semHorarios}</p>;
 
   return (
     <div className="grid grid-cols-3 gap-2">
-      {slots.map((slot) => (
-        <button
-          key={slot.time}
-          disabled={!slot.available}
-          onClick={() => slot.available && onSelect(slot.time)}
-          className={cn(
-            'py-2 px-3 rounded-lg text-sm font-medium transition-colors',
-            slot.available
-              ? selectedTime === slot.time
-                ? 'text-white'
-                : 'border hover:opacity-80'
-              : 'opacity-40 cursor-not-allowed border'
-          )}
-          style={
-            slot.available && selectedTime === slot.time
-              ? { backgroundColor: 'var(--color-primary)', color: 'var(--color-primary-foreground)', borderColor: 'var(--color-primary)' }
-              : slot.available
-              ? { borderColor: 'var(--color-border)', color: 'var(--color-foreground)', backgroundColor: 'var(--color-background)' }
-              : { borderColor: 'var(--color-border)', color: 'var(--color-muted-foreground)', backgroundColor: 'var(--color-muted)' }
-          }
-        >
-          {slot.time}
-        </button>
-      ))}
+      {slots.map((slot) => {
+        const isSelected = slot.available && selectedTime === slot.time;
+        return (
+          <button
+            key={slot.time}
+            disabled={!slot.available}
+            onClick={() => slot.available && onSelect(slot.time)}
+            className={cn(
+              'py-2 px-3 rounded-lg text-sm font-medium transition-colors border',
+              !slot.available && 'opacity-40 cursor-not-allowed bg-muted text-muted-foreground border-border',
+              slot.available && !isSelected && 'bg-background text-foreground border-border hover:opacity-80',
+              isSelected && 'bg-primary text-primary-foreground border-primary'
+            )}
+          >
+            {slot.time}
+          </button>
+        );
+      })}
     </div>
   );
 }

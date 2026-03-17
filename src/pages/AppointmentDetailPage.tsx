@@ -12,17 +12,7 @@ import texts from "../config/texts.json";
 const t = texts.agendamentos;
 const tGeral = texts.geral;
 
-const STATUS_LABELS = {
-  confirmed: "Confirmado",
-  cancelled: "Cancelado",
-  completed: "Concluído",
-} as const;
-
-const STATUS_COLORS = {
-  confirmed: "var(--color-primary)",
-  cancelled: "var(--color-destructive)",
-  completed: "var(--color-muted-foreground)",
-} as const;
+const STATUS_LABELS = { confirmed: "Confirmado", cancelled: "Cancelado", completed: "Concluído" } as const;
 
 export function AppointmentDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -30,140 +20,60 @@ export function AppointmentDetailPage() {
   const clientId = useAuthStore((s) => s.clientId);
   const { upcoming, past, isLoading } = useAppointments(clientId);
   const { mutate: cancelMutate, isPending, isError } = useCancelAppointment();
-
   const [dialogOpen, setDialogOpen] = useState(false);
 
-  const all = [...upcoming, ...past];
-  const appointment = all.find((a) => a.id === id);
-
+  const appointment = [...upcoming, ...past].find((a) => a.id === id);
   const today = new Date().toISOString().split("T")[0];
-  const canCancel =
-    appointment?.status === "confirmed" && appointment.date >= today;
+  const canCancel = appointment?.status === "confirmed" && appointment.date >= today;
 
   const handleCancelConfirm = () => {
     if (!appointment) return;
-    cancelMutate(appointment.id, {
-      onSuccess: () => {
-        setDialogOpen(false);
-        navigate("/appointments");
-      },
-    });
+    cancelMutate(appointment.id, { onSuccess: () => { setDialogOpen(false); navigate("/appointments"); } });
   };
+
+  const isConfirmed = appointment?.status === "confirmed";
+  const isCancelled = appointment?.status === "cancelled";
 
   return (
     <MobileLayout>
       <div className="mb-4">
-        <Button
-          variant="ghost"
-          onClick={() => navigate("/appointments")}
-          className="px-0"
-        >
-          ← Agendamentos
-        </Button>
+        <Button variant="ghost" onClick={() => navigate("/appointments")} className="px-0">← Agendamentos</Button>
       </div>
-
       {isLoading ? (
-        <div
-          className="text-sm"
-          style={{ color: "var(--color-muted-foreground)" }}
-        >
-          {tGeral.carregando}
-        </div>
+        <div className="text-sm text-muted-foreground">{tGeral.carregando}</div>
       ) : !appointment ? (
-        <div
-          className="text-sm"
-          style={{ color: "var(--color-muted-foreground)" }}
-        >
-          {tGeral.erro}
-        </div>
+        <div className="text-sm text-muted-foreground">{tGeral.erro}</div>
       ) : (
-        <div
-          className="rounded-lg border p-5 space-y-4"
-          style={{
-            backgroundColor: "var(--color-card)",
-            borderColor: "var(--color-border)",
-          }}
-        >
+        <div className="rounded-lg border border-border p-5 space-y-4 bg-card">
           <div className="flex items-start justify-between gap-2">
-            <h1
-              className="text-lg font-bold"
-              style={{ color: "var(--color-foreground)" }}
-            >
-              {appointment.serviceName}
-            </h1>
-            <span
-              className="text-xs font-medium px-2 py-1 rounded-full shrink-0"
-              style={{
-                color: STATUS_COLORS[appointment.status],
-                backgroundColor: "var(--color-background)",
-                border: `1px solid ${STATUS_COLORS[appointment.status]}`,
-              }}
-            >
+            <h1 className="text-lg font-display font-bold text-foreground">{appointment.serviceName}</h1>
+            <span className={`text-xs font-medium px-2 py-1 rounded-full shrink-0 border bg-background ${
+              isConfirmed ? "text-primary border-primary" : isCancelled ? "text-destructive border-destructive" : "text-muted-foreground border-muted-foreground"
+            }`}>
               {STATUS_LABELS[appointment.status]}
             </span>
           </div>
-
-          <DetailRow label="Profissional" value={appointment.professionalName} />
-          <DetailRow label="Data" value={formatDate(appointment.date)} />
-          <DetailRow label="Horário" value={formatTime(appointment.time)} />
-          <DetailRow label="Duração" value={`${appointment.duration} min`} />
-          <DetailRow label="Valor" value={formatCurrency(appointment.price)} />
-
-          {isError && (
-            <p
-              className="text-sm"
-              style={{ color: "var(--color-destructive)" }}
-            >
-              {tGeral.erro}
-            </p>
-          )}
-
+          <Row label="Profissional" value={appointment.professionalName} />
+          <Row label="Data" value={formatDate(appointment.date)} />
+          <Row label="Horário" value={formatTime(appointment.time)} />
+          <Row label="Duração" value={`${appointment.duration} min`} />
+          <Row label="Valor" value={formatCurrency(appointment.price)} />
+          {isError && <p className="text-sm text-destructive">{tGeral.erro}</p>}
           {canCancel && (
-            <Button
-              variant="secondary"
-              className="w-full mt-2"
-              onClick={() => setDialogOpen(true)}
-              loading={isPending}
-            >
-              {t.cancelar}
-            </Button>
+            <Button variant="secondary" className="w-full mt-2" onClick={() => setDialogOpen(true)} loading={isPending}>{t.cancelar}</Button>
           )}
         </div>
       )}
-
-      <Dialog
-        isOpen={dialogOpen}
-        title={t.cancelar}
-        message={t.confirmarCancelamento}
-        confirmLabel={t.cancelar}
-        cancelLabel="Voltar"
-        onConfirm={handleCancelConfirm}
-        onCancel={() => setDialogOpen(false)}
-      />
+      <Dialog isOpen={dialogOpen} title={t.cancelar} message={t.confirmarCancelamento} confirmLabel={t.cancelar} cancelLabel="Voltar" onConfirm={handleCancelConfirm} onCancel={() => setDialogOpen(false)} />
     </MobileLayout>
   );
 }
 
-interface DetailRowProps {
-  label: string;
-  value: string;
-}
-
-function DetailRow({ label, value }: DetailRowProps) {
+function Row({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex justify-between gap-4">
-      <span
-        className="text-sm"
-        style={{ color: "var(--color-muted-foreground)" }}
-      >
-        {label}
-      </span>
-      <span
-        className="text-sm font-medium text-right"
-        style={{ color: "var(--color-foreground)" }}
-      >
-        {value}
-      </span>
+      <span className="text-sm text-muted-foreground">{label}</span>
+      <span className="text-sm font-medium text-right text-foreground">{value}</span>
     </div>
   );
 }

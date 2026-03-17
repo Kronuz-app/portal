@@ -23,35 +23,14 @@ export function Dialog({
   if (!isOpen) return null;
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="dialog-title"
-    >
-      {/* Backdrop */}
-      <div
-        className="absolute inset-0 bg-black/60"
-        onClick={onCancel}
-        aria-hidden="true"
-      />
-
-      {/* Panel */}
+    <div className="fixed inset-0 z-50 flex items-center justify-center" role="dialog" aria-modal="true" aria-labelledby="dialog-title">
+      <div className="absolute inset-0 bg-black/60" onClick={onCancel} aria-hidden="true" />
       <div className="relative z-10 mx-4 w-full max-w-sm rounded-lg bg-card border border-border p-6 shadow-xl">
-        <h2
-          id="dialog-title"
-          className="mb-2 text-base font-semibold text-card-foreground"
-        >
-          {title}
-        </h2>
+        <h2 id="dialog-title" className="mb-2 text-base font-semibold text-card-foreground">{title}</h2>
         <p className="mb-6 text-sm text-muted-foreground">{message}</p>
         <div className="flex gap-3 justify-end">
-          <Button variant="ghost" onClick={onCancel}>
-            {cancelLabel}
-          </Button>
-          <Button variant="primary" onClick={onConfirm}>
-            {confirmLabel}
-          </Button>
+          <Button variant="ghost" onClick={onCancel}>{cancelLabel}</Button>
+          <Button variant="primary" onClick={onConfirm}>{confirmLabel}</Button>
         </div>
       </div>
     </div>

@@ -15,17 +15,6 @@ export function Card({
   children,
   className,
 }: CardProps) {
-  const base =
-    "rounded-lg bg-card text-card-foreground p-4 border border-border";
-
-  const selectable =
-    variant === "selectable"
-      ? "cursor-pointer transition-colors hover:border-primary"
-      : "";
-
-  const selectedStyle =
-    selected ? "border-primary ring-1 ring-primary" : "";
-
   return (
     <div
       role={variant === "selectable" ? "button" : undefined}
@@ -36,7 +25,12 @@ export function Card({
           ? (e) => (e.key === "Enter" || e.key === " ") && onClick?.()
           : undefined
       }
-      className={cn(base, selectable, selectedStyle, className)}
+      className={cn(
+        "rounded-lg bg-card text-card-foreground p-4 border border-border",
+        variant === "selectable" && "cursor-pointer transition-colors hover:border-primary",
+        selected && "border-primary ring-1 ring-primary",
+        className
+      )}
     >
       {children}
     </div>
