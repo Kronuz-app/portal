@@ -7,13 +7,13 @@ O Trinity Scheduler Core é o backend centralizado da aplicação Trinity Schedu
 ## Glossário
 
 - **API**: Interface de programação de aplicações REST exposta pelo backend
-- **Cliente**: Pessoa que agenda serviços pelo painel do cliente (trinity-scheduler-client)
-- **Admin**: Dono do estabelecimento com acesso total ao painel administrativo
-- **Staff**: Profissional do estabelecimento com acesso restrito à própria agenda e dados no painel administrativo
+- **Admin**: Super administrador da plataforma (desenvolvedores, investidores) com acesso total a todos os estabelecimentos
+- **Leader**: Dono do estabelecimento com acesso total ao seu negócio (gerencia serviços, profissionais, horários, clientes)
+- **Professional**: Profissional do estabelecimento (barbeiro, cabeleireiro) com acesso restrito à própria agenda e horários
+- **Client**: Cliente final que agenda serviços pelo painel do cliente (trinity-scheduler-client), autenticado apenas por telefone
 - **Estabelecimento (Shop)**: Negócio cadastrado na plataforma (ex: barbearia, salão)
 - **Serviço (Service)**: Serviço oferecido pelo estabelecimento (ex: Corte Masculino)
 - **Adicional (Addon)**: Serviço complementar opcional ao serviço principal (ex: Sobrancelha)
-- **Profissional (Professional/Staff)**: Pessoa que executa os serviços no estabelecimento
 - **Agendamento (Appointment)**: Reserva de horário de um cliente com um profissional para um serviço
 - **Unidade (Unit)**: Filial ou localização física do estabelecimento
 - **Slot**: Intervalo de horário disponível para agendamento
@@ -21,40 +21,54 @@ O Trinity Scheduler Core é o backend centralizado da aplicação Trinity Schedu
 - **Prisma_ORM**: Ferramenta de mapeamento objeto-relacional para acesso ao PostgreSQL
 - **Servidor_API**: Aplicação Express.js que processa as requisições HTTP
 
+## Hierarquia de Roles
+
+| Role | Descrição | Acesso |
+|------|-----------|--------|
+| **admin** | Super admin (devs/investidores) | Acesso total a todos os estabelecimentos e dados da plataforma |
+| **leader** | Dono do estabelecimento | CRUD completo do próprio estabelecimento: serviços, profissionais, clientes, unidades, horários, dashboard |
+| **professional** | Profissional/barbeiro | Visualiza agenda própria, gerencia próprios horários de trabalho, visualiza serviços e colegas |
+| **client** | Cliente final | Usa apenas o frontend client (trinity-scheduler-client), autenticado por telefone |
+
 ## Requisitos
 
-### Requisito 1: Autenticação do Cliente por Telefone
+### Requisito 1: Autenticação e Identificação do Cliente
 
-**User Story:** Como cliente, quero me autenticar usando meu número de telefone, para que eu possa acessar meus agendamentos de forma simples.
+**User Story:** Como cliente, quero ser identificado automaticamente quando acesso a aplicação via link com meu ID, ou me autenticar pelo telefone caso contrário, para que eu possa acessar meus agendamentos de forma simples e sem fricção.
 
 #### Critérios de Aceitação
 
-1. WHEN um número de telefone válido é enviado via POST /auth/login, THE Servidor_API SHALL retornar o identificador do cliente (clientId) correspondente
-2. WHEN um número de telefone não cadastrado é enviado via POST /auth/login, THE Servidor_API SHALL criar um novo registro de cliente e retornar o clientId gerado
+1. WHEN um número de telefone válido é enviado via POST /auth/login, THE Servidor_API SHALL retornar o identificador do cliente (clientId UUID) correspondente
+2. WHEN um número de telefone não cadastrado é enviado via POST /auth/login, THE Servidor_API SHALL criar um novo registro de cliente e retornar o clientId (UUID) gerado
 3. IF o campo "phone" estiver ausente ou vazio na requisição, THEN THE Servidor_API SHALL retornar status 400 com mensagem de erro descritiva
+4. WHEN uma requisição GET /auth/validate?clientId={uuid} é recebida com um clientId válido (UUID existente no banco), THE Servidor_API SHALL retornar status 200 com os dados básicos do cliente (clientId, name)
+5. IF o clientId enviado via GET /auth/validate não existir no banco, THEN THE Servidor_API SHALL retornar status 404
+6. WHEN o frontend do cliente recebe um clientId via query parameter na URL (ex: ?clientId={uuid}), THE Frontend_Client SHALL salvar o clientId no localStorage e pular a tela de login por telefone
+7. WHEN o frontend do cliente é carregado e já existe um clientId no localStorage, THE Frontend_Client SHALL validar o clientId via GET /auth/validate e, se válido, pular a tela de login por telefone
+8. IF o clientId armazenado no localStorage for inválido (retorno 404 do /auth/validate), THEN THE Frontend_Client SHALL remover o clientId do localStorage e exibir a tela de login por telefone
 
 ---
 
-### Requisito 2: Autenticação do Admin/Staff por Email e Senha
+### Requisito 2: Autenticação do Leader/Professional por Email e Senha
 
-**User Story:** Como admin ou staff, quero me autenticar com email e senha, para que eu possa acessar o painel administrativo com segurança.
+**User Story:** Como leader ou professional, quero me autenticar com email e senha, para que eu possa acessar o painel administrativo com segurança.
 
 #### Critérios de Aceitação
 
 1. WHEN credenciais válidas (email e senha) são enviadas via POST /admin/auth/login, THE Servidor_API SHALL retornar os dados do usuário (name, email, avatar, role) e um token JWT válido
 2. IF o email não estiver cadastrado ou a senha estiver incorreta, THEN THE Servidor_API SHALL retornar status 401 com mensagem de erro genérica
-3. THE Servidor_API SHALL incluir o campo "role" (admin ou staff) no payload do JWT gerado
+3. THE Servidor_API SHALL incluir o campo "role" (admin, leader ou professional) no payload do JWT gerado
 4. THE Servidor_API SHALL armazenar senhas utilizando hash bcrypt com salt
 
 ---
 
-### Requisito 3: Registro de Conta (Admin + Estabelecimento)
+### Requisito 3: Registro de Conta (Leader + Estabelecimento)
 
-**User Story:** Como novo dono de estabelecimento, quero criar minha conta junto com os dados do meu negócio, para que eu possa começar a usar a plataforma.
+**User Story:** Como novo dono de estabelecimento, quero criar minha conta de leader junto com os dados do meu negócio, para que eu possa começar a usar a plataforma.
 
 #### Critérios de Aceitação
 
-1. WHEN dados válidos de owner, shop e professional são enviados via POST /admin/auth/register, THE Servidor_API SHALL criar o usuário admin, o estabelecimento e o primeiro profissional em uma única transação e retornar status 201
+1. WHEN dados válidos de owner, shop e professional são enviados via POST /admin/auth/register, THE Servidor_API SHALL criar o usuário com role "leader", o estabelecimento e o primeiro profissional em uma única transação e retornar status 201
 2. IF o email do owner já estiver cadastrado, THEN THE Servidor_API SHALL retornar status 409 com mensagem indicando duplicidade
 3. IF algum campo obrigatório estiver ausente (name, email, password do owner; name do shop), THEN THE Servidor_API SHALL retornar status 400 com detalhes dos campos inválidos
 4. IF ocorrer erro durante a transação de registro, THEN THE Servidor_API SHALL reverter todas as operações (rollback) e retornar status 500
@@ -63,7 +77,7 @@ O Trinity Scheduler Core é o backend centralizado da aplicação Trinity Schedu
 
 ### Requisito 4: Recuperação de Senha
 
-**User Story:** Como admin ou staff, quero solicitar a redefinição da minha senha, para que eu possa recuperar o acesso à minha conta.
+**User Story:** Como leader ou professional, quero solicitar a redefinição da minha senha, para que eu possa recuperar o acesso à minha conta.
 
 #### Critérios de Aceitação
 
@@ -75,26 +89,26 @@ O Trinity Scheduler Core é o backend centralizado da aplicação Trinity Schedu
 
 ### Requisito 5: Gestão do Estabelecimento (Shop)
 
-**User Story:** Como admin, quero visualizar e atualizar os dados do meu estabelecimento, para que as informações estejam sempre corretas.
+**User Story:** Como leader, quero visualizar e atualizar os dados do meu estabelecimento, para que as informações estejam sempre corretas.
 
 #### Critérios de Aceitação
 
-1. WHEN uma requisição GET /admin/shop é feita por um admin autenticado, THE Servidor_API SHALL retornar os dados do estabelecimento (name, phone, email, address)
-2. WHEN dados válidos são enviados via PUT /admin/shop por um admin autenticado, THE Servidor_API SHALL atualizar o estabelecimento e retornar status 200
-3. WHILE o usuário autenticado possui role "staff", THE Servidor_API SHALL rejeitar requisições PUT /admin/shop com status 403
+1. WHEN uma requisição GET /admin/shop é feita por um leader autenticado, THE Servidor_API SHALL retornar os dados do estabelecimento (name, phone, email, address)
+2. WHEN dados válidos são enviados via PUT /admin/shop por um leader autenticado, THE Servidor_API SHALL atualizar o estabelecimento e retornar status 200
+3. WHILE o usuário autenticado possui role "professional", THE Servidor_API SHALL rejeitar requisições PUT /admin/shop com status 403
 
 ---
 
 ### Requisito 6: Horários de Funcionamento do Estabelecimento
 
-**User Story:** Como admin, quero configurar os horários de funcionamento do meu estabelecimento, para que o sistema calcule a disponibilidade corretamente.
+**User Story:** Como leader, quero configurar os horários de funcionamento do meu estabelecimento, para que o sistema calcule a disponibilidade corretamente.
 
 #### Critérios de Aceitação
 
-1. WHEN uma requisição GET /admin/shop/hours é feita por um admin autenticado, THE Servidor_API SHALL retornar a lista de horários de funcionamento para cada dia da semana (day, start, end)
-2. WHEN horários válidos são enviados via PUT /admin/shop/hours por um admin autenticado, THE Servidor_API SHALL atualizar os horários e retornar status 200
+1. WHEN uma requisição GET /admin/shop/hours é feita por um leader autenticado, THE Servidor_API SHALL retornar a lista de horários de funcionamento para cada dia da semana (day, start, end)
+2. WHEN horários válidos são enviados via PUT /admin/shop/hours por um leader autenticado, THE Servidor_API SHALL atualizar os horários e retornar status 200
 3. THE Servidor_API SHALL aceitar valores null para start e end, indicando que o estabelecimento está fechado naquele dia
-4. WHILE o usuário autenticado possui role "staff", THE Servidor_API SHALL rejeitar requisições aos endpoints de horários com status 403
+4. WHILE o usuário autenticado possui role "professional", THE Servidor_API SHALL rejeitar requisições aos endpoints de horários do estabelecimento com status 403
 
 ---
 
@@ -191,97 +205,98 @@ O Trinity Scheduler Core é o backend centralizado da aplicação Trinity Schedu
 
 ---
 
-### Requisito 15: Gestão de Agendamentos (Admin)
+### Requisito 15: Gestão de Agendamentos (Admin Panel)
 
-**User Story:** Como admin, quero gerenciar todos os agendamentos do estabelecimento, para que eu possa ter controle total da agenda.
+**User Story:** Como leader, quero gerenciar todos os agendamentos do estabelecimento, e como professional, quero visualizar e gerenciar minha própria agenda.
 
 #### Critérios de Aceitação
 
-1. WHEN uma requisição GET /admin/appointments é feita por um admin autenticado, THE Servidor_API SHALL retornar todos os agendamentos, suportando filtros opcionais por date, staffId, status, serviceId e clientId
-2. WHILE o usuário autenticado possui role "staff", THE Servidor_API SHALL retornar apenas os agendamentos atribuídos ao próprio profissional no endpoint GET /admin/appointments
+1. WHEN uma requisição GET /admin/appointments é feita por um leader autenticado, THE Servidor_API SHALL retornar todos os agendamentos, suportando filtros opcionais por date, professionalId, status, serviceId e clientId
+2. WHILE o usuário autenticado possui role "professional", THE Servidor_API SHALL retornar apenas os agendamentos atribuídos ao próprio profissional no endpoint GET /admin/appointments
 3. WHEN uma requisição GET /admin/appointments/{id} é feita, THE Servidor_API SHALL retornar o agendamento específico com todos os campos
-4. WHEN dados válidos são enviados via POST /admin/appointments, THE Servidor_API SHALL criar o agendamento e retornar status 201 com o objeto criado
-5. WHEN dados válidos são enviados via PUT /admin/appointments/{id}, THE Servidor_API SHALL atualizar o agendamento (reagendar, alterar status) e retornar status 200 com o objeto atualizado
-6. WHEN uma requisição DELETE /admin/appointments/{id} é feita por um admin, THE Servidor_API SHALL remover o agendamento e retornar status 204
-7. WHILE o usuário autenticado possui role "staff", THE Servidor_API SHALL rejeitar requisições DELETE /admin/appointments/{id} com status 403
+4. WHEN dados válidos são enviados via POST /admin/appointments por um leader, THE Servidor_API SHALL criar o agendamento e retornar status 201 com o objeto criado
+5. WHEN dados válidos são enviados via PUT /admin/appointments/{id} por um leader, THE Servidor_API SHALL atualizar o agendamento (reagendar, alterar status) e retornar status 200 com o objeto atualizado
+6. WHEN uma requisição DELETE /admin/appointments/{id} é feita por um leader, THE Servidor_API SHALL remover o agendamento e retornar status 204
+7. WHILE o usuário autenticado possui role "professional", THE Servidor_API SHALL rejeitar requisições POST, PUT e DELETE em /admin/appointments com status 403
 
 ---
 
-### Requisito 16: Gestão de Clientes (Admin)
+### Requisito 16: Gestão de Clientes (Leader)
 
-**User Story:** Como admin, quero gerenciar os clientes do meu estabelecimento, para que eu possa manter um cadastro organizado.
+**User Story:** Como leader, quero gerenciar os clientes do meu estabelecimento, para que eu possa manter um cadastro organizado.
 
 #### Critérios de Aceitação
 
-1. WHEN uma requisição GET /admin/clients é feita por um admin autenticado, THE Servidor_API SHALL retornar a lista paginada de clientes com os campos id, name, phone, email, notes, birthday, totalSpent, lastVisit e createdAt, suportando os parâmetros search, page e perPage
+1. WHEN uma requisição GET /admin/clients é feita por um leader autenticado, THE Servidor_API SHALL retornar a lista paginada de clientes com os campos id, name, phone, email, notes, birthday, totalSpent, lastVisit e createdAt, suportando os parâmetros search, page e perPage
 2. WHEN o parâmetro search é fornecido, THE Servidor_API SHALL filtrar clientes cujo name ou phone contenham o termo de busca
 3. THE Servidor_API SHALL retornar o campo "total" junto com "data" para suportar paginação no frontend
 4. WHEN uma requisição GET /admin/clients/{id} é feita, THE Servidor_API SHALL retornar o cliente específico com todos os campos
 5. WHEN dados válidos são enviados via POST /admin/clients, THE Servidor_API SHALL criar o cliente e retornar status 201 com o objeto criado
 6. WHEN dados válidos são enviados via PUT /admin/clients/{id}, THE Servidor_API SHALL atualizar o cliente e retornar status 200 com o objeto atualizado
 7. WHEN uma requisição DELETE /admin/clients/{id} é feita, THE Servidor_API SHALL remover o cliente e retornar status 204
-8. WHILE o usuário autenticado possui role "staff", THE Servidor_API SHALL rejeitar requisições aos endpoints de clientes com status 403
+8. WHILE o usuário autenticado possui role "professional", THE Servidor_API SHALL rejeitar requisições aos endpoints de clientes com status 403
 
 ---
 
-### Requisito 17: Gestão de Serviços e Adicionais (Admin)
+### Requisito 17: Gestão de Serviços e Adicionais (Leader)
 
-**User Story:** Como admin, quero gerenciar os serviços e adicionais do meu estabelecimento, para que eu possa manter o catálogo atualizado.
+**User Story:** Como leader, quero gerenciar os serviços e adicionais do meu estabelecimento, para que eu possa manter o catálogo atualizado.
 
 #### Critérios de Aceitação
 
-1. WHEN uma requisição GET /admin/services é feita por um usuário autenticado, THE Servidor_API SHALL retornar a lista de todos os serviços e adicionais com os campos id, name, duration, price, description, type e image
+1. WHEN uma requisição GET /admin/services é feita por um usuário autenticado (leader ou professional), THE Servidor_API SHALL retornar a lista de todos os serviços e adicionais com os campos id, name, duration, price, description, type e image
 2. WHEN uma requisição GET /admin/services/{id} é feita, THE Servidor_API SHALL retornar o serviço específico com todos os campos
-3. WHEN dados válidos são enviados via POST /admin/services por um admin, THE Servidor_API SHALL criar o serviço ou adicional (conforme campo type) e retornar status 201 com o objeto criado
-4. WHEN dados válidos são enviados via PUT /admin/services/{id} por um admin, THE Servidor_API SHALL atualizar o serviço e retornar status 200 com o objeto atualizado
-5. WHEN uma requisição DELETE /admin/services/{id} é feita por um admin, THE Servidor_API SHALL remover o serviço e retornar status 204
-6. WHILE o usuário autenticado possui role "staff", THE Servidor_API SHALL permitir apenas leitura (GET) nos endpoints de serviços e rejeitar POST, PUT e DELETE com status 403
+3. WHEN dados válidos são enviados via POST /admin/services por um leader, THE Servidor_API SHALL criar o serviço ou adicional (conforme campo type) e retornar status 201 com o objeto criado
+4. WHEN dados válidos são enviados via PUT /admin/services/{id} por um leader, THE Servidor_API SHALL atualizar o serviço e retornar status 200 com o objeto atualizado
+5. WHEN uma requisição DELETE /admin/services/{id} é feita por um leader, THE Servidor_API SHALL remover o serviço e retornar status 204
+6. WHILE o usuário autenticado possui role "professional", THE Servidor_API SHALL permitir apenas leitura (GET) nos endpoints de serviços e rejeitar POST, PUT e DELETE com status 403
 
 ---
 
-### Requisito 18: Gestão de Profissionais/Staff (Admin)
+### Requisito 18: Gestão de Profissionais (Leader)
 
-**User Story:** Como admin, quero gerenciar os profissionais do meu estabelecimento, para que eu possa controlar a equipe e suas agendas.
+**User Story:** Como leader, quero gerenciar os profissionais do meu estabelecimento, para que eu possa controlar a equipe e suas agendas.
 
 #### Critérios de Aceitação
 
-1. WHEN uma requisição GET /admin/staff é feita por um usuário autenticado, THE Servidor_API SHALL retornar a lista de profissionais com os campos id, unitId, name, avatar, specialties, workingHours, phone e email, suportando filtro opcional por unitId
-2. WHEN uma requisição GET /admin/staff/{id} é feita, THE Servidor_API SHALL retornar o profissional específico com todos os campos incluindo workingHours (day, start, end, lunchStart, lunchEnd)
-3. WHEN dados válidos são enviados via POST /admin/staff por um admin, THE Servidor_API SHALL criar o profissional e retornar status 201 com o objeto criado
-4. WHEN dados válidos são enviados via PUT /admin/staff/{id} por um admin, THE Servidor_API SHALL atualizar o profissional e retornar status 200 com o objeto atualizado
-5. WHEN uma requisição DELETE /admin/staff/{id} é feita por um admin, THE Servidor_API SHALL remover o profissional e retornar status 204
-6. WHILE o usuário autenticado possui role "staff", THE Servidor_API SHALL permitir apenas leitura (GET) nos endpoints de profissionais e rejeitar POST, PUT e DELETE com status 403
+1. WHEN uma requisição GET /admin/professionals é feita por um usuário autenticado (leader ou professional), THE Servidor_API SHALL retornar a lista de profissionais com os campos id, unitId, name, avatar, specialties, workingHours, phone e email, suportando filtro opcional por unitId
+2. WHEN uma requisição GET /admin/professionals/{id} é feita, THE Servidor_API SHALL retornar o profissional específico com todos os campos incluindo workingHours (day, start, end, lunchStart, lunchEnd)
+3. WHEN dados válidos são enviados via POST /admin/professionals por um leader, THE Servidor_API SHALL criar o profissional e retornar status 201 com o objeto criado
+4. WHEN dados válidos são enviados via PUT /admin/professionals/{id} por um leader, THE Servidor_API SHALL atualizar o profissional e retornar status 200 com o objeto atualizado
+5. WHEN uma requisição DELETE /admin/professionals/{id} é feita por um leader, THE Servidor_API SHALL remover o profissional e retornar status 204
+6. WHILE o usuário autenticado possui role "professional", THE Servidor_API SHALL permitir leitura (GET) de todos os profissionais e PUT apenas no próprio registro (para gerenciar seus horários de trabalho), rejeitando POST e DELETE com status 403
+7. IF um professional tentar atualizar (PUT) o registro de outro profissional, THEN THE Servidor_API SHALL retornar status 403
 
 ---
 
-### Requisito 19: Gestão de Unidades (Admin)
+### Requisito 19: Gestão de Unidades (Leader)
 
-**User Story:** Como admin, quero gerenciar as unidades/filiais do meu estabelecimento, para que eu possa organizar múltiplas localizações.
+**User Story:** Como leader, quero gerenciar as unidades/filiais do meu estabelecimento, para que eu possa organizar múltiplas localizações.
 
 #### Critérios de Aceitação
 
-1. WHEN uma requisição GET /admin/units é feita por um usuário autenticado, THE Servidor_API SHALL retornar a lista de unidades com os campos id, name, address e phone
+1. WHEN uma requisição GET /admin/units é feita por um usuário autenticado (leader ou professional), THE Servidor_API SHALL retornar a lista de unidades com os campos id, name, address e phone
 2. WHEN uma requisição GET /admin/units/{id} é feita, THE Servidor_API SHALL retornar a unidade específica com todos os campos
-3. WHEN dados válidos são enviados via POST /admin/units por um admin, THE Servidor_API SHALL criar a unidade e retornar status 201 com o objeto criado
-4. WHEN dados válidos são enviados via PUT /admin/units/{id} por um admin, THE Servidor_API SHALL atualizar a unidade e retornar status 200 com o objeto atualizado
-5. WHEN uma requisição DELETE /admin/units/{id} é feita por um admin, THE Servidor_API SHALL remover a unidade e retornar status 204
-6. WHILE o usuário autenticado possui role "staff", THE Servidor_API SHALL permitir apenas leitura (GET) nos endpoints de unidades e rejeitar POST, PUT e DELETE com status 403
+3. WHEN dados válidos são enviados via POST /admin/units por um leader, THE Servidor_API SHALL criar a unidade e retornar status 201 com o objeto criado
+4. WHEN dados válidos são enviados via PUT /admin/units/{id} por um leader, THE Servidor_API SHALL atualizar a unidade e retornar status 200 com o objeto atualizado
+5. WHEN uma requisição DELETE /admin/units/{id} é feita por um leader, THE Servidor_API SHALL remover a unidade e retornar status 204
+6. WHILE o usuário autenticado possui role "professional", THE Servidor_API SHALL permitir apenas leitura (GET) nos endpoints de unidades e rejeitar POST, PUT e DELETE com status 403
 
 ---
 
-### Requisito 20: Dashboard de Métricas (Admin)
+### Requisito 20: Dashboard de Métricas (Leader)
 
-**User Story:** Como admin, quero visualizar métricas do meu estabelecimento, para que eu possa acompanhar o desempenho do negócio.
+**User Story:** Como leader, quero visualizar métricas do meu estabelecimento, para que eu possa acompanhar o desempenho do negócio.
 
 #### Critérios de Aceitação
 
-1. WHEN uma requisição GET /admin/dashboard/stats com parâmetro date é feita por um admin autenticado, THE Servidor_API SHALL retornar as métricas do dia: revenue (faturamento), appointmentCount (total de agendamentos), topService (serviço mais agendado) e newClients (novos clientes)
-2. WHEN uma requisição GET /admin/dashboard/weekly-revenue é feita por um admin autenticado, THE Servidor_API SHALL retornar o faturamento semanal agrupado por dia e por profissional
-3. WHILE o usuário autenticado possui role "staff", THE Servidor_API SHALL rejeitar requisições aos endpoints de dashboard com status 403
+1. WHEN uma requisição GET /admin/dashboard/stats com parâmetro date é feita por um leader autenticado, THE Servidor_API SHALL retornar as métricas do dia: revenue (faturamento), appointmentCount (total de agendamentos), topService (serviço mais agendado) e newClients (novos clientes)
+2. WHEN uma requisição GET /admin/dashboard/weekly-revenue é feita por um leader autenticado, THE Servidor_API SHALL retornar o faturamento semanal agrupado por dia e por profissional
+3. WHILE o usuário autenticado possui role "professional", THE Servidor_API SHALL rejeitar requisições aos endpoints de dashboard com status 403
 
 ---
 
-### Requisito 21: Middleware de Autenticação e Autorização (Admin)
+### Requisito 21: Middleware de Autenticação e Autorização (Admin Panel)
 
 **User Story:** Como sistema, quero proteger os endpoints administrativos, para que apenas usuários autenticados e autorizados possam acessá-los.
 
@@ -290,7 +305,9 @@ O Trinity Scheduler Core é o backend centralizado da aplicação Trinity Schedu
 1. THE Servidor_API SHALL validar o token JWT no header Authorization (formato "Bearer {token}") em todas as requisições aos endpoints /admin/* (exceto /admin/auth/*)
 2. IF o token JWT estiver ausente ou inválido, THEN THE Servidor_API SHALL retornar status 401
 3. IF o token JWT estiver expirado, THEN THE Servidor_API SHALL retornar status 401 com mensagem indicando expiração
-4. THE Servidor_API SHALL extrair o shopId e o role do token JWT e disponibilizá-los para os handlers de rota
+4. THE Servidor_API SHALL extrair o shopId e o role (admin, leader ou professional) do token JWT e disponibilizá-los para os handlers de rota
+5. THE Servidor_API SHALL suportar um middleware de autorização por role que aceita uma lista de roles permitidos por endpoint, retornando status 403 para roles não autorizados
+6. WHEN o role é "admin", THE Servidor_API SHALL conceder acesso total a todos os endpoints e todos os estabelecimentos (bypass do filtro por shopId)
 
 ---
 
