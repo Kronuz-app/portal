@@ -6,8 +6,8 @@ Implementação incremental do backend Express.js + Prisma + PostgreSQL, partind
 
 ## Tarefas
 
-- [ ] 1. Configurar infraestrutura do projeto e dependências
-  - [ ] 1.1 Inicializar projeto TypeScript com Express.js e dependências
+- [x] 1. Configurar infraestrutura do projeto e dependências
+  - [x] 1.1 Inicializar projeto TypeScript com Express.js e dependências
     - Configurar `package.json` com scripts (dev, build, start, test, prisma:generate, prisma:migrate)
     - Instalar dependências: express, prisma, @prisma/client, jsonwebtoken, bcrypt, cors, swagger-jsdoc, swagger-ui-express, dotenv
     - Instalar devDependencies: typescript, ts-node, tsx, @types/express, @types/jsonwebtoken, @types/bcrypt, @types/cors, @types/swagger-jsdoc, @types/swagger-ui-express, vitest, fast-check
@@ -15,7 +15,7 @@ Implementação incremental do backend Express.js + Prisma + PostgreSQL, partind
     - Criar `.env` com DATABASE_URL, JWT_SECRET, PORT
     - _Requisitos: 22.4, 24.1_
 
-  - [ ] 1.2 Criar schema Prisma e gerar client
+  - [x] 1.2 Criar schema Prisma e gerar client
     - Criar `prisma/schema.prisma` com todos os modelos: Shop, User, Role, ShopHour, Service, ServiceType, Professional, WorkingHour, Client, Appointment, AppointmentStatus, Unit
     - Incluir todos os enums (Role, ServiceType, AppointmentStatus)
     - Incluir todas as relações, @@unique constraints e @default values conforme design
@@ -23,7 +23,7 @@ Implementação incremental do backend Express.js + Prisma + PostgreSQL, partind
     - Executar `npx prisma generate` e `npx prisma migrate dev`
     - _Requisitos: 23.1, 23.2_
 
-  - [ ] 1.3 Criar utilitários base (prisma client, jwt, password, errors)
+  - [x] 1.3 Criar utilitários base (prisma client, jwt, password, errors)
     - `src/utils/prisma.ts` — singleton do PrismaClient
     - `src/utils/jwt.ts` — funções sign(payload) e verify(token) com tipagem AuthUser
     - `src/utils/password.ts` — funções hash(password) e compare(password, hash) com bcrypt
@@ -31,14 +31,14 @@ Implementação incremental do backend Express.js + Prisma + PostgreSQL, partind
     - `src/types/express.d.ts` — extensão do Request com user (AuthUser) e shopId
     - _Requisitos: 2.3, 2.4, 22.1_
 
-- [ ] 2. Configurar Express app, middlewares globais e Swagger
-  - [ ] 2.1 Criar entry point e configuração do Express
+- [x] 2. Configurar Express app, middlewares globais e Swagger
+  - [x] 2.1 Criar entry point e configuração do Express
     - `src/index.ts` — cria app e escuta na porta (process.env.PORT)
     - `src/app.ts` — configura Express com json(), cors(), monta rotas e error handler
     - `src/config/env.ts` — variáveis de ambiente tipadas (DATABASE_URL, JWT_SECRET, PORT)
     - _Requisitos: 22.4_
 
-  - [ ] 2.2 Implementar middleware de tratamento de erros
+  - [x] 2.2 Implementar middleware de tratamento de erros
     - `src/middlewares/errorHandler.ts` — captura AppError e erros genéricos, mapeia erros Prisma (P2002→409, P2025→404), retorna JSON { error, message }
     - Erros não tratados retornam 500 com mensagem genérica e log via console.error
     - _Requisitos: 22.1, 22.2, 22.3, 22.4_
@@ -47,30 +47,30 @@ Implementação incremental do backend Express.js + Prisma + PostgreSQL, partind
     - **Propriedade 23: Formato consistente de respostas de erro**
     - **Valida: Requisitos 22.1, 22.2, 22.3**
 
-  - [ ] 2.4 Configurar Swagger/OpenAPI
+  - [x] 2.4 Configurar Swagger/OpenAPI
     - `src/config/swagger.ts` — configuração swagger-jsdoc com info, servers, tags e securitySchemes (bearerAuth, X-Shop-Id)
     - Montar swagger-ui-express em `/api-docs` no app.ts
     - Definir schemas reutilizáveis: Error, Client, ClientInput, Service, ServiceInput, Professional, ProfessionalInput, Appointment, AppointmentInput, Unit, UnitInput, Shop, ShopHour, Slot, DashboardStats, LoginRequest, AdminLoginRequest, AdminLoginResponse, RegisterRequest
     - Definir responses reutilizáveis: Unauthorized, Forbidden, NotFound
     - _Requisitos: 24.1, 24.2, 24.3, 24.4, 24.5_
 
-- [ ] 3. Implementar middlewares de autenticação e autorização
-  - [ ] 3.1 Implementar middleware de autenticação JWT (admin)
+- [x] 3. Implementar middlewares de autenticação e autorização
+  - [x] 3.1 Implementar middleware de autenticação JWT (admin)
     - `src/middlewares/auth.ts` — verifica Bearer token, decodifica JWT, injeta req.user com { id, shopId, role, professionalId? }
     - Retorna 401 se token ausente, inválido ou expirado
     - _Requisitos: 21.1, 21.2, 21.3, 21.4_
 
-  - [ ] 3.2 Implementar middleware de autorização por role
+  - [x] 3.2 Implementar middleware de autorização por role
     - `src/middlewares/authorize.ts` — factory authorize(...roles) que verifica req.user.role contra lista permitida
     - Retorna 403 se role não autorizado
     - _Requisitos: 21.5_
 
-  - [ ] 3.3 Implementar middleware de filtro multi-tenant
+  - [x] 3.3 Implementar middleware de filtro multi-tenant
     - `src/middlewares/tenantFilter.ts` — injeta shopId do JWT nas queries (GET: req.query, POST/PUT: req.body)
     - Role admin bypassa o filtro (acesso cross-tenant)
     - _Requisitos: 23.1, 23.2, 23.3_
 
-  - [ ] 3.4 Implementar middleware shopResolver (rotas do cliente)
+  - [x] 3.4 Implementar middleware shopResolver (rotas do cliente)
     - `src/middlewares/shopResolver.ts` — extrai shopId do header X-Shop-Id ou query param shopId
     - Valida existência do shop no banco, injeta req.shopId
     - Retorna 400 se ausente, 404 se shop não existe
@@ -91,8 +91,8 @@ Implementação incremental do backend Express.js + Prisma + PostgreSQL, partind
 - [ ] 4. Checkpoint — Verificar infraestrutura base
   - Garantir que todos os testes passam, perguntar ao usuário se houver dúvidas.
 
-- [ ] 5. Implementar autenticação do cliente (telefone)
-  - [ ] 5.1 Criar rotas de autenticação do cliente
+- [x] 5. Implementar autenticação do cliente (telefone)
+  - [x] 5.1 Criar rotas de autenticação do cliente
     - `src/routes/client/auth.routes.ts` — POST /auth/login (login por telefone, cria ou retorna clientId) e GET /auth/validate (valida clientId)
     - POST /auth/login: recebe { phone }, busca ou cria Client no shopId, retorna { clientId }
     - GET /auth/validate?clientId={uuid}: valida existência, retorna { clientId, name } ou 404
@@ -108,8 +108,8 @@ Implementação incremental do backend Express.js + Prisma + PostgreSQL, partind
     - **Propriedade 2: Round-trip de validação do cliente**
     - **Valida: Requisitos 1.4**
 
-- [ ] 6. Implementar autenticação admin (login, registro, forgot-password)
-  - [ ] 6.1 Criar rotas de autenticação admin
+- [x] 6. Implementar autenticação admin (login, registro, forgot-password)
+  - [x] 6.1 Criar rotas de autenticação admin
     - `src/routes/admin/auth.routes.ts` — POST /admin/auth/login, POST /admin/auth/register, POST /admin/auth/forgot-password
     - Login: valida email/senha com bcrypt, retorna { user: { name, email, avatar, role }, token: JWT }
     - Register: cria User (leader) + Shop + Professional em transação Prisma ($transaction), retorna 201
@@ -133,8 +133,8 @@ Implementação incremental do backend Express.js + Prisma + PostgreSQL, partind
     - **Propriedade 6: Token de redefinição com validade máxima de 1 hora**
     - **Valida: Requisitos 4.1, 4.3**
 
-- [ ] 7. Implementar rotas do estabelecimento (shop e horários)
-  - [ ] 7.1 Criar rotas de gestão do shop
+- [x] 7. Implementar rotas do estabelecimento (shop e horários)
+  - [x] 7.1 Criar rotas de gestão do shop
     - `src/routes/admin/shop.routes.ts` — GET /admin/shop e PUT /admin/shop
     - GET retorna dados do shop do usuário autenticado (name, phone, email, address)
     - PUT atualiza dados do shop, authorize('leader', 'admin')
@@ -153,15 +153,15 @@ Implementação incremental do backend Express.js + Prisma + PostgreSQL, partind
 - [ ] 8. Checkpoint — Verificar autenticação e shop
   - Garantir que todos os testes passam, perguntar ao usuário se houver dúvidas.
 
-- [ ] 9. Implementar rotas públicas do cliente (serviços, adicionais, profissionais)
-  - [ ] 9.1 Criar rotas de listagem de serviços e adicionais
+- [x] 9. Implementar rotas públicas do cliente (serviços, adicionais, profissionais)
+  - [x] 9.1 Criar rotas de listagem de serviços e adicionais
     - `src/routes/client/services.routes.ts` — GET /services (retorna serviços ativos com type="service")
     - `src/routes/client/addons.routes.ts` — GET /addons (retorna adicionais ativos com type="addon")
     - Campos retornados: id, name, duration, price, description, icon, image
     - Incluir anotações Swagger
     - _Requisitos: 7.1, 7.2, 8.1, 8.2_
 
-  - [ ] 9.2 Criar rota de listagem de profissionais
+  - [x] 9.2 Criar rota de listagem de profissionais
     - `src/routes/client/professionals.routes.ts` — GET /professionals (retorna profissionais ativos)
     - Campos retornados: id, name, avatar, specialties
     - Incluir anotações Swagger
@@ -171,15 +171,15 @@ Implementação incremental do backend Express.js + Prisma + PostgreSQL, partind
     - **Propriedade 9: Filtragem de tipo em serviços e adicionais**
     - **Valida: Requisitos 7.1, 7.2, 8.1, 8.2**
 
-- [ ] 10. Implementar serviço e rotas de disponibilidade
-  - [ ] 10.1 Implementar AvailabilityService
+- [x] 10. Implementar serviço e rotas de disponibilidade
+  - [x] 10.1 Implementar AvailabilityService
     - `src/services/availability.service.ts` — funções getAvailableSlots e getDisabledDates
     - getAvailableSlots: busca ShopHour + WorkingHour + Appointments, calcula effectiveStart/End, gera slots de 30min, remove almoço e conflitos
     - getDisabledDates: para cada data no range, verifica se há pelo menos 1 slot disponível
     - Quando professionalId é null, unir disponibilidade de todos os profissionais (slot available se ≥1 profissional disponível)
     - _Requisitos: 10.1, 10.2, 10.3, 10.4, 11.1, 11.2, 11.3_
 
-  - [ ] 10.2 Criar rotas de disponibilidade
+  - [x] 10.2 Criar rotas de disponibilidade
     - `src/routes/client/availability.routes.ts` — GET /availability/slots e GET /availability/disabled-dates
     - GET /availability/slots: params professionalId (opcional), date (obrigatório), serviceDuration (opcional)
     - GET /availability/disabled-dates: params professionalId (opcional), startDate, endDate
@@ -198,14 +198,14 @@ Implementação incremental do backend Express.js + Prisma + PostgreSQL, partind
     - **Propriedade 12: Datas indisponíveis são consistentes com slots**
     - **Valida: Requisitos 11.1, 11.2, 11.3**
 
-- [ ] 11. Implementar agendamentos do cliente
-  - [ ] 11.1 Implementar AppointmentService
+- [x] 11. Implementar agendamentos do cliente
+  - [x] 11.1 Implementar AppointmentService
     - `src/services/appointment.service.ts` — funções createAppointment e cancelAppointment
     - createAppointment: valida slot disponível, calcula duration (serviço + addons), calcula price (serviço + addons em centavos), auto-atribui profissional se null, cria com status "confirmed"
     - cancelAppointment: valida existência e status, atualiza para "cancelled" com reason
     - _Requisitos: 12.1, 12.2, 12.3, 12.4, 14.1_
 
-  - [ ] 11.2 Criar rotas de agendamentos do cliente
+  - [x] 11.2 Criar rotas de agendamentos do cliente
     - `src/routes/client/appointments.routes.ts` — POST /appointments, GET /appointments, PATCH /appointments/:id/cancel
     - POST: cria agendamento, retorna objeto com nomes resolvidos (serviceName, professionalName)
     - GET: lista agendamentos por clientId (query param), retorna com nomes resolvidos
@@ -228,8 +228,8 @@ Implementação incremental do backend Express.js + Prisma + PostgreSQL, partind
 - [ ] 12. Checkpoint — Verificar fluxo completo do cliente
   - Garantir que todos os testes passam, perguntar ao usuário se houver dúvidas.
 
-- [ ] 13. Implementar rotas admin de agendamentos
-  - [ ] 13.1 Criar rotas de gestão de agendamentos (admin)
+- [x] 13. Implementar rotas admin de agendamentos
+  - [x] 13.1 Criar rotas de gestão de agendamentos (admin)
     - `src/routes/admin/appointments.routes.ts` — GET /admin/appointments (com filtros date, professionalId, status, serviceId, clientId), GET /admin/appointments/:id, POST /admin/appointments, PUT /admin/appointments/:id, DELETE /admin/appointments/:id
     - Professional vê apenas próprios agendamentos (filtro por professionalId do JWT)
     - authorize: GET para leader/professional/admin, POST/PUT/DELETE para leader/admin
@@ -240,8 +240,8 @@ Implementação incremental do backend Express.js + Prisma + PostgreSQL, partind
     - **Propriedade 16: Isolamento de agendamentos por role professional**
     - **Valida: Requisitos 15.2**
 
-- [ ] 14. Implementar rotas admin de clientes
-  - [ ] 14.1 Criar rotas de gestão de clientes (admin)
+- [x] 14. Implementar rotas admin de clientes
+  - [x] 14.1 Criar rotas de gestão de clientes (admin)
     - `src/routes/admin/clients.routes.ts` — GET /admin/clients (paginado com search, page, perPage), GET /admin/clients/:id, POST /admin/clients, PUT /admin/clients/:id, DELETE /admin/clients/:id
     - GET retorna { data: Client[], total: number }
     - search filtra por name ou phone (contains, insensitive)
@@ -253,24 +253,24 @@ Implementação incremental do backend Express.js + Prisma + PostgreSQL, partind
     - **Propriedade 17: Busca de clientes filtra por nome ou telefone**
     - **Valida: Requisitos 16.2, 16.3**
 
-- [ ] 15. Implementar rotas admin de serviços
-  - [ ] 15.1 Criar rotas de gestão de serviços (admin)
+- [x] 15. Implementar rotas admin de serviços
+  - [x] 15.1 Criar rotas de gestão de serviços (admin)
     - `src/routes/admin/services.routes.ts` — GET /admin/services, GET /admin/services/:id, POST /admin/services, PUT /admin/services/:id, DELETE /admin/services/:id
     - GET retorna todos os serviços e adicionais (ambos os types)
     - authorize: GET para leader/professional/admin, POST/PUT/DELETE para leader/admin
     - Incluir anotações Swagger
     - _Requisitos: 17.1, 17.2, 17.3, 17.4, 17.5, 17.6_
 
-- [ ] 16. Implementar rotas admin de profissionais
-  - [ ] 16.1 Criar rotas de gestão de profissionais (admin)
+- [x] 16. Implementar rotas admin de profissionais
+  - [x] 16.1 Criar rotas de gestão de profissionais (admin)
     - `src/routes/admin/professionals.routes.ts` — GET /admin/professionals (filtro por unitId), GET /admin/professionals/:id (inclui workingHours), POST /admin/professionals, PUT /admin/professionals/:id, DELETE /admin/professionals/:id
     - PUT por professional: permitido apenas no próprio registro (req.user.professionalId === id), senão 403
     - authorize: GET para leader/professional/admin, POST/DELETE para leader/admin, PUT com lógica especial para professional
     - Incluir anotações Swagger
     - _Requisitos: 18.1, 18.2, 18.3, 18.4, 18.5, 18.6, 18.7_
 
-- [ ] 17. Implementar rotas admin de unidades
-  - [ ] 17.1 Criar rotas de gestão de unidades (admin)
+- [x] 17. Implementar rotas admin de unidades
+  - [x] 17.1 Criar rotas de gestão de unidades (admin)
     - `src/routes/admin/units.routes.ts` — GET /admin/units, GET /admin/units/:id, POST /admin/units, PUT /admin/units/:id, DELETE /admin/units/:id
     - authorize: GET para leader/professional/admin, POST/PUT/DELETE para leader/admin
     - Incluir anotações Swagger
@@ -287,8 +287,8 @@ Implementação incremental do backend Express.js + Prisma + PostgreSQL, partind
 - [ ] 18. Checkpoint — Verificar CRUD admin completo
   - Garantir que todos os testes passam, perguntar ao usuário se houver dúvidas.
 
-- [ ] 19. Implementar dashboard de métricas
-  - [ ] 19.1 Criar rotas de dashboard (admin)
+- [x] 19. Implementar dashboard de métricas
+  - [x] 19.1 Criar rotas de dashboard (admin)
     - `src/routes/admin/dashboard.routes.ts` — GET /admin/dashboard/stats (param date) e GET /admin/dashboard/weekly-revenue
     - Stats: calcula revenue (soma price de confirmed/completed em centavos), appointmentCount, topService (serviço com mais agendamentos), newClients (clientes criados na data)
     - Weekly-revenue: faturamento dos últimos 7 dias agrupado por dia e profissional
@@ -300,8 +300,8 @@ Implementação incremental do backend Express.js + Prisma + PostgreSQL, partind
     - **Propriedade 20: Cálculo correto de métricas do dashboard**
     - **Valida: Requisitos 20.1**
 
-- [ ] 20. Montar roteador principal e integrar todos os componentes
-  - [ ] 20.1 Criar roteador principal e conectar todas as rotas
+- [x] 20. Montar roteador principal e integrar todos os componentes
+  - [x] 20.1 Criar roteador principal e conectar todas as rotas
     - `src/routes/index.ts` — mountRoutes(app) conectando todas as rotas client (com shopResolver) e admin (com authMiddleware + tenantFilter)
     - Verificar que todas as rotas estão montadas nos paths corretos conforme design
     - Garantir que middleware chain está na ordem correta: CORS → JSON → Swagger → Routes → Error Handler
