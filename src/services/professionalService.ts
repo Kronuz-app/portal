@@ -1,11 +1,7 @@
 import type { Professional } from "../lib/types";
-import { mockProfessionals } from "../mocks/professionals";
+import { clientApi } from "../lib/api";
 
-const simulateDelay = (ms: number): Promise<void> =>
-  new Promise((resolve) => setTimeout(resolve, ms));
-
-export async function getProfessionals(delay = 800): Promise<Professional[]> {
-  await simulateDelay(delay);
-  console.log("[professionalService] getProfessionals", mockProfessionals);
-  return mockProfessionals;
+export async function getProfessionals(): Promise<Professional[]> {
+  const response = await clientApi("/professionals");
+  return response.json();
 }

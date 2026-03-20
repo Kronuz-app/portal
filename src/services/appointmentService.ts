@@ -1,61 +1,31 @@
 import type { Appointment, CreateAppointmentPayload } from "../lib/types";
-import { mockAppointments } from "../mocks/appointments";
-import { mockServices } from "../mocks/services";
-import { mockProfessionals } from "../mocks/professionals";
+import { clientApi } from "../lib/api";
+import { centsToReais } from "../lib/price";
 
-const simulateDelay = (ms: number): Promise<void> =>
-  new Promise((resolve) => setTimeout(resolve, ms));
-
-export async function getAppointments(
-  clientId: string,
-  delay = 800
-): Promise<Appointment[]> {
-  await simulateDelay(delay);
-  const result = mockAppointments.filter((a) => a.clientId === clientId);
-  console.log("[appointmentService] getAppointments", { clientId, result });
-  return result;
+export async function getAppointments(clientId: string): Promise<Appointment[]> {
+  const response = await clientApi(`/appointments?clientId=${clientId}`);
+  const data: Appointment[] = await response.json();
+  return data.map((a) => ({ ...a, price: centsToReais(a.price) }));
 }
 
 export async function createAppointment(
-  payload: CreateAppointmentPayload,
-  delay = 800
+  payload: CreateAppointmentPayload
 ): Promise<Appointment> {
-  await simulateDelay(delay);
-  console.log("[appointmentService] createAppointment", payload);
-
-  const service = mockServices.find((s) => s.id === payload.serviceId);
-  const professional = payload.professionalId
-    ? mockProfessionals.find((p) => p.id === payload.professionalId)
-    : null;
-
-  const appointment: Appointment = {
-    id: `apt-${Date.now()}`,
-    clientId: payload.clientId,
-    serviceId: payload.serviceId,
-    serviceName: service?.name ?? payload.serviceId,
-    professionalId: payload.professionalId ?? "any",
-    professionalName: professional?.name ?? "Sem preferência",
-    date: payload.date,
-    time: payload.time,
-    duration: service?.duration ?? 30,
-    price: service?.price ?? 0,
-    status: "confirmed",
-  };
-
-  mockAppointments.push(appointment);
-  return appointment;
+  const response = await clientApi("/appointments", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+  const data: Appointment = await response.json();
+  return { ...data, price: centsToReais(data.price) };
 }
 
 export async function cancelAppointment(
   appointmentId: string,
-  reason?: string,
-  delay = 800
+  reason?: string
 ): Promise<void> {
-  await simulateDelay(delay);
-  const appointment = mockAppointments.find((a) => a.id === appointmentId);
-  if (appointment) {
-    appointment.status = "cancelled";
-    if (reason) appointment.cancelReason = reason;
-  }
-  console.log("[appointmentService] cancelAppointment", { appointmentId });
+  const body = reason !== undefined ? JSON.stringify({ reason }) : undefined;
+  await clientApi(`/appointments/${appointmentId}/cancel`, {
+    method: "PATCH",
+    body,
+  });
 }

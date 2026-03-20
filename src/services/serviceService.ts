@@ -1,11 +1,12 @@
 import type { Service } from "../lib/types";
-import { mockServices } from "../mocks/services";
+import { clientApi } from "../lib/api";
+import { centsToReais } from "../lib/price";
 
-const simulateDelay = (ms: number): Promise<void> =>
-  new Promise((resolve) => setTimeout(resolve, ms));
-
-export async function getServices(delay = 800): Promise<Service[]> {
-  await simulateDelay(delay);
-  console.log("[serviceService] getServices", mockServices);
-  return mockServices;
+export async function getServices(): Promise<Service[]> {
+  const response = await clientApi("/services");
+  const data: Service[] = await response.json();
+  return data.map((service) => ({
+    ...service,
+    price: centsToReais(service.price),
+  }));
 }

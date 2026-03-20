@@ -1,9 +1,19 @@
-const simulateDelay = (ms: number): Promise<void> =>
-  new Promise((resolve) => setTimeout(resolve, ms));
+import { clientApi } from "../lib/api";
 
-export async function login(phone: string, delay = 800): Promise<string> {
-  await simulateDelay(delay);
-  const clientId = "client-mock-001";
-  console.log("[authService] login", { phone, clientId });
-  return clientId;
+export async function login(phone: string): Promise<string> {
+  const response = await clientApi("/auth/login", {
+    method: "POST",
+    body: JSON.stringify({ phone }),
+  });
+  const data = await response.json();
+  return data.clientId;
+}
+
+export async function validateSession(clientId: string): Promise<boolean> {
+  try {
+    await clientApi(`/auth/validate?clientId=${encodeURIComponent(clientId)}`);
+    return true;
+  } catch {
+    return false;
+  }
 }

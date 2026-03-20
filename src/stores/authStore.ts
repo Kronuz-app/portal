@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { login as authServiceLogin } from "../services/authService";
+import { login as authServiceLogin, validateSession } from "../services/authService";
 
 const STORAGE_KEY = "trinity_client_id";
 
@@ -12,7 +12,7 @@ interface AuthState {
   login: (phone: string) => Promise<void>;
   loginFromUrl: (clientId: string) => void;
   logout: () => void;
-  init: () => void;
+  init: () => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
@@ -43,10 +43,24 @@ export const useAuthStore = create<AuthState>((set) => ({
     set({ clientId: null, isAuthenticated: false, error: null });
   },
 
-  init: () => {
+  init: async () => {
     const clientId = localStorage.getItem(STORAGE_KEY);
-    if (clientId) {
-      set({ clientId, isAuthenticated: true });
+    if (!clientId) return;
+
+    set({ isLoading: true });
+    try {
+      const isValid = await validateSession(clientId);
+      if (isValid) {
+        set({ clientId, isAuthenticated: true, isLoading: false });
+      } else {
+        localStorage.removeItem(STORAGE_KEY);
+        set({ clientId: null, isAuthenticated: false, isLoading: false });
+        window.location.href = "/login";
+      }
+    } catch {
+      localStorage.removeItem(STORAGE_KEY);
+      set({ clientId: null, isAuthenticated: false, isLoading: false });
+      window.location.href = "/login";
     }
   },
 }));
