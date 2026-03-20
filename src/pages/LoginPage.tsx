@@ -20,10 +20,6 @@ export function LoginPage() {
   const navigate = useNavigate();
   const { login, isLoading, isAuthenticated } = useAuthStore();
 
-  if (isAuthenticated) {
-    return <Navigate to="/booking" replace />;
-  }
-
   const {
     register, handleSubmit, setValue,
     formState: { errors, isValid },
@@ -38,6 +34,10 @@ export function LoginPage() {
     await login(data.phone);
     navigate("/booking");
   };
+
+  if (isAuthenticated) {
+    return <Navigate to="/booking" replace />;
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
