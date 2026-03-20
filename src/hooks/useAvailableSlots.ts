@@ -8,7 +8,6 @@ import {
 function getDateRange() {
   const today = new Date();
   const start = new Date(today);
-  start.setDate(today.getDate() + 1);
   const end = new Date(today);
   end.setDate(today.getDate() + 30);
   const fmt = (d: Date) =>

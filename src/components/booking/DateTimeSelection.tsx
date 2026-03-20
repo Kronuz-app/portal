@@ -9,7 +9,7 @@ import texts from '../../config/texts.json';
 function generateNext30Days(): string[] {
   const days: string[] = [];
   const today = new Date();
-  for (let i = 1; i <= 30; i++) {
+  for (let i = 0; i <= 30; i++) {
     const d = new Date(today);
     d.setDate(today.getDate() + i);
     days.push(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`);
