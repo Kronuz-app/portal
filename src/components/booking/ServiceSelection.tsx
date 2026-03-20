@@ -79,7 +79,9 @@ export function ServiceSelection() {
                         <p className="text-sm font-medium text-card-foreground">{addon.name}</p>
                         {addon.duration > 0 && (
                           <p className="text-xs text-muted-foreground flex items-center gap-1">
-                            <Clock className="h-3 w-3" /> +{addon.duration} min
+                            <Clock className="h-3 w-3" />
+                            <Plus className="h-2.5 w-2.5" />
+                            {addon.duration} min
                           </p>
                         )}
                       </div>
