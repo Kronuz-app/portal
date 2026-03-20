@@ -1,11 +1,13 @@
 import { useEffect } from "react";
 import { Routes, Route, Navigate, useSearchParams, useLocation } from "react-router-dom";
 import { useAuthStore } from "./stores/authStore";
+import { decodeShopId } from "./lib/api";
 import { LoginPage } from "./pages/LoginPage";
 import { BookingPage } from "./pages/BookingPage";
 import { BookingSuccessPage } from "./pages/BookingSuccessPage";
 import { AppointmentsPage } from "./pages/AppointmentsPage";
 import { AppointmentDetailPage } from "./pages/AppointmentDetailPage";
+import { NotFoundPage } from "./pages/NotFoundPage";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -37,6 +39,12 @@ function AppRoutes() {
       loginFromUrl(clientId);
     }
   }, [searchParams, loginFromUrl]);
+
+  const shopId = decodeShopId();
+
+  if (!shopId) {
+    return <NotFoundPage />;
+  }
 
   return (
     <>
@@ -75,6 +83,7 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       />
+      <Route path="*" element={<NotFoundPage />} />
     </Routes>
     </>
   );
