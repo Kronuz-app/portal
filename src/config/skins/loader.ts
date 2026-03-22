@@ -174,6 +174,34 @@ function hexToHSL(hex: string): string {
 }
 
 /**
+ * Gera uma cor intermediária entre o texto e o background para uso como muted-foreground (placeholder)
+ * Mistura 45% do texto com 55% do background para criar um tom visivelmente mais suave
+ */
+function hexToMutedForeground(textHex: string, backgroundHex: string): string {
+  const parseHex = (hex: string) => {
+    hex = hex.replace('#', '');
+    return {
+      r: parseInt(hex.substring(0, 2), 16),
+      g: parseInt(hex.substring(2, 4), 16),
+      b: parseInt(hex.substring(4, 6), 16),
+    };
+  };
+
+  const text = parseHex(textHex);
+  const bg = parseHex(backgroundHex);
+
+  // Mistura 45% texto + 55% background
+  const mixed = {
+    r: Math.round(text.r * 0.45 + bg.r * 0.55),
+    g: Math.round(text.g * 0.45 + bg.g * 0.55),
+    b: Math.round(text.b * 0.45 + bg.b * 0.55),
+  };
+
+  const toHex = (v: number) => v.toString(16).padStart(2, '0');
+  return hexToHSL(`#${toHex(mixed.r)}${toHex(mixed.g)}${toHex(mixed.b)}`);
+}
+
+/**
  * Aplica cores da skin às variáveis CSS do documento
  * Define variáveis CSS no formato HSL para uso com Tailwind
  * 
@@ -230,8 +258,9 @@ export function applyColors(colors: ThemeConfig['colors']): void {
   root.style.setProperty('--popover', backgroundHSL);
   root.style.setProperty('--popover-foreground', textHSL);
   
-  // Muted foreground usa o texto principal (para contraste com bg-muted)
-  root.style.setProperty('--muted-foreground', textHSL);
+  // Muted foreground usa uma versão mais suave do texto (para placeholder e textos secundários)
+  const mutedForegroundHSL = hexToMutedForeground(colors.text, colors.background);
+  root.style.setProperty('--muted-foreground', mutedForegroundHSL);
   
   // Primary foreground usa o background (contraste com primary)
   root.style.setProperty('--primary-foreground', backgroundHSL);
