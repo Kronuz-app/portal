@@ -38,6 +38,7 @@ export function SkinProvider({ children }: SkinProviderProps) {
         // Busca nicho configurado da API
         const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
         const shopId = localStorage.getItem('trinity_shop_id');
+        const unitId = localStorage.getItem('trinity_unit_id');
         
         // Aguarda até que shopId esteja disponível
         if (!shopId) {
@@ -48,14 +49,22 @@ export function SkinProvider({ children }: SkinProviderProps) {
           return;
         }
         
-        const response = await fetch(`${apiUrl}/client/shop/info`, {
+        // Monta URL com unitId se disponível
+        const url = unitId 
+          ? `${apiUrl}/client/shop/info?unitId=${unitId}`
+          : `${apiUrl}/client/shop/info`;
+        
+        console.log('[Skin] Buscando info do shop:', { shopId, unitId, url });
+        
+        const response = await fetch(url, {
           headers: {
             'X-Shop-Id': shopId,
           },
         });
         
         if (!response.ok) {
-          throw new Error('Falha ao buscar informações do estabelecimento');
+          console.error('[Skin] Erro ao buscar shop info:', response.status, response.statusText);
+          throw new Error(`Falha ao buscar informações do estabelecimento: ${response.status}`);
         }
         
         const data = await response.json();
@@ -93,6 +102,7 @@ export function SkinProvider({ children }: SkinProviderProps) {
         
         // Tenta carregar skin padrão como fallback
         try {
+          console.log('[Skin] Carregando skin padrão como fallback...');
           const fallbackConfig = await loadSkin('barbearia');
           applyColors(fallbackConfig.colors);
           setConfig(fallbackConfig);
