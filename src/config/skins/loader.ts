@@ -1,5 +1,7 @@
 import { ThemeConfigSchemaZ, type ThemeConfig } from './schema';
 
+export type { ThemeConfig };
+
 const CACHE_KEY = 'trinity_theme_config';
 const CACHE_TIMESTAMP_KEY = 'trinity_theme_timestamp';
 const CACHE_DURATION_MS = 24 * 60 * 60 * 1000; // 24 hours
