@@ -28,10 +28,10 @@ export function BookingSuccessPage() {
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground">
       <Header />
-      <main className="flex-1 px-4 md:px-8 py-6 flex items-center justify-center">
-        <div className="flex flex-col items-center gap-6 text-center w-full max-w-md">
-          <CheckCircle size={64} className="text-primary" aria-hidden="true" />
-          <div className="flex flex-col gap-2">
+      <main className="flex-1 px-4 py-6 flex items-center">
+        <div className="flex flex-col gap-6 w-full">
+          <div className="flex flex-col items-center gap-2 text-center">
+            <CheckCircle size={64} className="text-primary" aria-hidden="true" />
             <h1 className="text-2xl font-display font-bold">{texts.booking.sucesso.titulo}</h1>
             <p className="text-sm text-muted-foreground">{texts.booking.sucesso.mensagem}</p>
           </div>
