@@ -49,7 +49,6 @@ function AppRoutes() {
     if (clientIdParam) {
       // Se o clientId é diferente do atual, faz logout e recarrega a página
       if (currentClientId && currentClientId !== clientIdParam) {
-        console.log('[Auth] Trocando de perfil:', currentClientId, '->', clientIdParam);
         logout();
         window.location.reload();
         return;
@@ -72,7 +71,6 @@ function AppRoutes() {
             
             // Se o userId é diferente do atual, faz logout e recarrega a página
             if (currentClientId && currentClientId !== userId) {
-              console.log('[Auth] Trocando de perfil via ref:', currentClientId, '->', userId);
               logout();
               localStorage.setItem('trinity_user_id', userId);
               window.location.reload();
@@ -84,7 +82,7 @@ function AppRoutes() {
             // Faz login automático com o userId
             loginFromUrl(userId);
           } catch (error) {
-            console.error('[App] Erro ao decodificar ref:', error);
+            // ignore decode errors
           }
         })();
       }
@@ -159,6 +157,9 @@ export default function App() {
           // Armazena em localStorage
           localStorage.setItem('trinity_shop_id', result.shopId);
           localStorage.setItem('trinity_unit_id', result.unitId);
+          localStorage.setItem('trinity_unit_name', result.unitName);
+          if (result.address) localStorage.setItem('trinity_unit_address', result.address);
+          else localStorage.removeItem('trinity_unit_address');
 
           console.log(`[Slug] Resolvido: ${slug} -> Shop: ${result.shopName}, Unit: ${result.unitName}`);
           

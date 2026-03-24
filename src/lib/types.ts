@@ -58,14 +58,6 @@ export interface CreateAppointmentPayload {
   unitId?: string | null;
 }
 
-export interface NicheConfig {
-  businessName: string;
-  logo: string; // path to logo
-  niche: string; // "barbearia", "salao", "clinica"
-  currency: string; // "BRL"
-  locale: string; // "pt-BR"
-}
-
 export interface AppTexts {
   login: {
     titulo: string;

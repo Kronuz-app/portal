@@ -2,9 +2,10 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { CheckCircle, CalendarPlus, CalendarDays, Clock, Timer, User, Scissors, DollarSign, Plus } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { Header } from '../components/layout/Header';
-import { formatCurrency, formatDate, buildGoogleCalendarUrl } from '../lib/utils';
+import { formatCurrency, formatDate } from '../lib/utils';
+import { useCalendarUrl } from '../hooks/useCalendarUrl';
+import { useShopName, useUnitAddress } from '../hooks/useShop';
 import texts from '../config/texts.json';
-import niche from '../config/niche.json';
 import type { Appointment, AddonService } from '../lib/types';
 
 export function BookingSuccessPage() {
@@ -14,16 +15,9 @@ export function BookingSuccessPage() {
   const addons: AddonService[] = location.state?.addons ?? [];
 
   const total = appointment?.price ?? 0;
-
-  const calendarUrl = appointment
-    ? buildGoogleCalendarUrl(
-        `${appointment.serviceName} — ${niche.businessName}`,
-        appointment.date,
-        appointment.time,
-        appointment.duration,
-        `Profissional: ${appointment.professionalName}`
-      )
-    : null;
+  const { name: shopName } = useShopName();
+  const unitAddress = useUnitAddress();
+  const calendarUrl = useCalendarUrl(appointment, shopName, unitAddress);
 
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground">

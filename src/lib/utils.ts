@@ -48,21 +48,14 @@ export function formatTime(time: string): string {
   return time;
 }
 
-/**
- * Builds a Google Calendar event URL from appointment data.
- * Works on mobile (opens native app if installed) and desktop.
- * @param title - Event title
- * @param date - Date string in YYYY-MM-DD format
- * @param time - Time string in HH:MM format
- * @param durationMinutes - Duration in minutes
- * @param description - Optional event description
- */
+
 export function buildGoogleCalendarUrl(
   title: string,
   date: string,
   time: string,
   durationMinutes: number,
-  description?: string
+  description?: string,
+  location?: string
 ): string {
   const [year, month, day] = date.split("-").map(Number);
   const [hours, minutes] = time.split(":").map(Number);
@@ -86,6 +79,7 @@ export function buildGoogleCalendarUrl(
   });
 
   if (description) params.set("details", description);
+  if (location) params.set("location", location);
 
   return `https://calendar.google.com/calendar/render?${params.toString()}`;
 }

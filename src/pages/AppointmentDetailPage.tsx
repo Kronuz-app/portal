@@ -3,11 +3,12 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useAuthStore } from "../stores/authStore";
 import { useAppointments } from "../hooks/useAppointments";
 import { useCancelAppointment } from "../hooks/useCancelAppointment";
+import { useShopName, useUnitAddress } from "../hooks/useShop";
 import { MobileLayout } from "../components/layout/MobileLayout";
 import { Button } from "../components/ui/Button";
-import { formatDate, formatTime, formatCurrency } from "../lib/utils";
+import { formatDate, formatTime, formatCurrency, buildGoogleCalendarUrl } from "../lib/utils";
 import texts from "../config/texts.json";
-import { ArrowLeft, Calendar, Clock, User, DollarSign, Scissors, CalendarX, CircleCheck, CircleDot, AlertTriangle, MessageSquare } from "lucide-react";
+import { ArrowLeft, Calendar, Clock, User, DollarSign, Scissors, CalendarX, CircleCheck, CircleDot, AlertTriangle, MessageSquare, CalendarPlus } from "lucide-react";
 
 const t = texts.agendamentos;
 const tGeral = texts.geral;
@@ -46,6 +47,22 @@ export function AppointmentDetailPage() {
 
   const config = appointment ? STATUS_CONFIG[appointment.status] : null;
   const StatusIcon = config?.icon;
+  const { name: shopName } = useShopName();
+  const unitAddress = useUnitAddress();
+  const isConfirmedFuture = appointment?.status === "confirmed" && appointment.date >= today;
+
+  function handleAddToCalendar() {
+    if (!appointment) return;
+    const url = buildGoogleCalendarUrl(
+      `${appointment.serviceName} - ${shopName}`,
+      appointment.date,
+      appointment.time,
+      appointment.duration,
+      `Profissional: ${appointment.professionalName}`,
+      unitAddress ?? undefined
+    );
+    window.open(url, "_blank", "noopener,noreferrer");
+  }
 
   return (
     <MobileLayout>
@@ -88,6 +105,14 @@ export function AppointmentDetailPage() {
               <DetailRow icon={<DollarSign className="h-4 w-4" />} label="Valor" value={formatCurrency(appointment.price)} highlight />
             </div>
           </div>
+
+          {/* Add to calendar */}
+          {isConfirmedFuture && (
+            <Button variant="secondary" className="w-full gap-2" onClick={handleAddToCalendar}>
+              <CalendarPlus className="h-4 w-4" />
+              {texts.booking.sucesso.botaoAgenda}
+            </Button>
+          )}
 
           {/* Cancel reason display */}
           {appointment.status === "cancelled" && appointment.cancelReason && (

@@ -1,13 +1,12 @@
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../../stores/authStore";
 import { useShopName } from "../../hooks/useShop";
-import niche from "../../config/niche.json";
 import texts from "../../config/texts.json";
 
 export function Header() {
   const logout = useAuthStore((s) => s.logout);
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
-  const shopName = useShopName();
+  const { name: shopName } = useShopName();
   const navigate = useNavigate();
 
   return (
@@ -17,14 +16,6 @@ export function Header() {
         onClick={() => isAuthenticated && navigate("/agendamento")}
         className={`flex items-center gap-2 ${isAuthenticated ? "cursor-pointer hover:opacity-80 transition-opacity" : "cursor-default"}`}
       >
-        <img
-          src={niche.logo}
-          alt={shopName}
-          className="h-8 w-8 object-contain"
-          onError={(e) => {
-            (e.currentTarget as HTMLImageElement).style.display = "none";
-          }}
-        />
         <span className="font-display font-semibold text-base text-primary">
           {shopName}
         </span>

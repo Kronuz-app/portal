@@ -3,6 +3,7 @@ interface SlugResolutionResult {
   shopId: string;
   unitName: string;
   shopName: string;
+  address: string | null;
 }
 
 /**

@@ -1,17 +1,11 @@
-import { useEffect, useState } from "react";
-import { getShopInfo } from "../services/shopService";
-import niche from "../config/niche.json";
+const UNIT_NAME_KEY = "trinity_unit_name";
+const UNIT_ADDRESS_KEY = "trinity_unit_address";
 
-export function useShopName() {
-  const [name, setName] = useState(niche.businessName);
+export function useShopName(): { name: string; isLoading: false } {
+  const name = localStorage.getItem(UNIT_NAME_KEY) ?? "";
+  return { name, isLoading: false };
+}
 
-  useEffect(() => {
-    getShopInfo()
-      .then((info) => setName(info.name))
-      .catch(() => {
-        // fallback to niche config
-      });
-  }, []);
-
-  return name;
+export function useUnitAddress(): string | null {
+  return localStorage.getItem(UNIT_ADDRESS_KEY);
 }

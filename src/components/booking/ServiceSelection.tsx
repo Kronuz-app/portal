@@ -50,7 +50,7 @@ export function ServiceSelection() {
             ))}
           </div>
 
-          {selectedService && (
+          {selectedService && addons.length > 0 && (
             <div className="flex flex-col gap-3 mt-2">
               <div>
                 <h3 className="text-sm font-display font-semibold text-foreground">{texts.booking.adicionais.titulo}</h3>
