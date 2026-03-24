@@ -9,12 +9,7 @@ export class ApiError extends Error {
 
 const API_URL = (() => {
   const url = import.meta.env.VITE_API_URL
-  if (!url) {
-    console.error(
-      "[api] VITE_API_URL não está definida. Usando http://localhost:3000 como fallback."
-    )
-    return "http://localhost:3000"
-  }
+  if (!url) return "http://localhost:3000"
   return url
 })()
 
@@ -36,8 +31,6 @@ function decodeLegacyRef(): { shopId: string; unitId: string | null } | null {
   
   try {
     const decoded = atob(ref)
-    
-    console.warn('[DEPRECATED] Formato legado de ref detectado. Use slugs de subdomínio.')
     
     // Armazena o valor decodificado como shopId
     localStorage.setItem(SHOP_STORAGE_KEY, decoded)

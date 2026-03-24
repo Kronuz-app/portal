@@ -3,7 +3,7 @@ import { Routes, Route, Navigate, useSearchParams, useLocation } from "react-rou
 import { useAuthStore } from "./stores/authStore";
 import { decodeShopId } from "./lib/api";
 import { extractSlugFromSubdomain, resolveSlug } from "./services/slugResolver";
-import { useMetaTags } from "./hooks/useMetaTags";
+import { saveUnitInfo, hasCachedUnitInfo, SHOP_ID_KEY } from "./hooks/useShop";import { useMetaTags } from "./hooks/useMetaTags";
 import { SkinProvider } from "./contexts/SkinContext";
 import { HomePage } from "./pages/HomePage";
 import { LoginPage } from "./pages/LoginPage";
@@ -60,7 +60,7 @@ function AppRoutes() {
     // Tenta decodificar userId do ref parameter (novo formato)
     if (refParam) {
       // Verifica se já temos shopId (slug resolvido)
-      const hasShopId = localStorage.getItem('trinity_shop_id') !== null;
+      const hasShopId = localStorage.getItem(SHOP_ID_KEY) !== null;
       
       if (hasShopId) {
         // Se temos shopId, o ref deve ser userId
@@ -151,19 +151,16 @@ export default function App() {
         const slug = extractSlugFromSubdomain();
 
         if (slug) {
-          // Resolve slug para obter shopId e unitId
+          // Se já temos dados em cache, usa imediatamente (evita flash de loading)
+          if (hasCachedUnitInfo()) {
+            setHasSlug(true);
+            setIsResolving(false);
+          }
+
+          // Resolve slug para obter shopId e unitId (atualiza cache em background)
           const result = await resolveSlug(slug);
-
-          // Armazena em localStorage
-          localStorage.setItem('trinity_shop_id', result.shopId);
-          localStorage.setItem('trinity_unit_id', result.unitId);
-          localStorage.setItem('trinity_unit_name', result.unitName);
-          if (result.address) localStorage.setItem('trinity_unit_address', result.address);
-          else localStorage.removeItem('trinity_unit_address');
-
-          console.log(`[Slug] Resolvido: ${slug} -> Shop: ${result.shopName}, Unit: ${result.unitName}`);
+          saveUnitInfo(result);
           
-          // Armazena info para meta tags
           setUnitInfo({ shopName: result.shopName, unitName: result.unitName });
           setHasSlug(true);
         } else {
@@ -173,7 +170,12 @@ export default function App() {
 
         setIsResolving(false);
       } catch (error) {
-        console.error('[Slug] Erro ao resolver:', error);
+        // Se falhou mas temos dados em cache, continua funcionando
+        if (hasCachedUnitInfo()) {
+          setHasSlug(true);
+          setIsResolving(false);
+          return;
+        }
         setResolutionError(error instanceof Error ? error.message : 'Erro ao resolver slug');
         setIsResolving(false);
       }

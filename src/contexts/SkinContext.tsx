@@ -42,7 +42,6 @@ export function SkinProvider({ children }: SkinProviderProps) {
         
         // Aguarda até que shopId esteja disponível
         if (!shopId) {
-          console.warn('[Skin] shopId não disponível ainda, usando skin padrão');
           const fallbackConfig = await loadSkin('barbearia');
           applyColors(fallbackConfig.colors);
           setConfig(fallbackConfig);
@@ -54,8 +53,6 @@ export function SkinProvider({ children }: SkinProviderProps) {
           ? `${apiUrl}/client/shop/info?unitId=${unitId}`
           : `${apiUrl}/client/shop/info`;
         
-        console.log('[Skin] Buscando info do shop:', { shopId, unitId, url });
-        
         const response = await fetch(url, {
           headers: {
             'X-Shop-Id': shopId,
@@ -63,14 +60,11 @@ export function SkinProvider({ children }: SkinProviderProps) {
         });
         
         if (!response.ok) {
-          console.error('[Skin] Erro ao buscar shop info:', response.status, response.statusText);
           throw new Error(`Falha ao buscar informações do estabelecimento: ${response.status}`);
         }
         
         const data = await response.json();
         const nicheId = data.niche || 'barbearia';
-        
-        console.log('[Skin] Niche recebido da API:', nicheId);
         
         // Verifica se o cache é do niche correto
         const cachedConfig = localStorage.getItem('trinity_theme_config');
@@ -78,11 +72,10 @@ export function SkinProvider({ children }: SkinProviderProps) {
           try {
             const parsed = JSON.parse(cachedConfig);
             if (parsed.metadata?.nicheId !== nicheId) {
-              console.log('[Skin] Cache de niche diferente detectado, invalidando...');
               localStorage.removeItem('trinity_theme_config');
               localStorage.removeItem('trinity_theme_timestamp');
             }
-          } catch (e) {
+          } catch {
             // Ignora erro de parse
           }
         }
@@ -90,24 +83,20 @@ export function SkinProvider({ children }: SkinProviderProps) {
         // Carrega skin correspondente
         const skinConfig = await loadSkin(nicheId);
         
-        console.log('[Skin] Skin carregada:', skinConfig.metadata.nicheId);
-        
         // Aplica cores às variáveis CSS
         applyColors(skinConfig.colors);
         
         setConfig(skinConfig);
       } catch (err) {
-        console.error('[Skin] Erro na inicialização:', err);
         setError(err instanceof Error ? err : new Error('Erro desconhecido'));
         
         // Tenta carregar skin padrão como fallback
         try {
-          console.log('[Skin] Carregando skin padrão como fallback...');
           const fallbackConfig = await loadSkin('barbearia');
           applyColors(fallbackConfig.colors);
           setConfig(fallbackConfig);
-        } catch (fallbackErr) {
-          console.error('[Skin] Erro ao carregar fallback:', fallbackErr);
+        } catch {
+          // fallback também falhou, sem skin
         }
       }
     }

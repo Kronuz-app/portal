@@ -47,8 +47,8 @@ export const useAuthStore = create<AuthState>((set) => ({
         if (result) {
           set({ clientName: result.name });
         }
-      } catch (error) {
-        console.error('[Auth] Erro ao validar sessão:', error);
+      } catch {
+        // ignore
       }
     })();
   },
@@ -72,12 +72,13 @@ export const useAuthStore = create<AuthState>((set) => ({
       if (result) {
         set({ clientId, clientName: result.name, isAuthenticated: true, isLoading: false });
       } else {
+        // Servidor confirmou que o clientId é inválido
         localStorage.removeItem(STORAGE_KEY);
         set({ clientId: null, clientName: null, isAuthenticated: false, isLoading: false });
       }
     } catch {
-      localStorage.removeItem(STORAGE_KEY);
-      set({ clientId: null, clientName: null, isAuthenticated: false, isLoading: false });
+      // Erro de rede ou servidor indisponível — mantém o clientId para tentar novamente
+      set({ isLoading: false });
     }
   },
 }));

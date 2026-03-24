@@ -45,8 +45,7 @@ function loadFromCache(): ThemeConfig | null {
     
     const parsed = JSON.parse(cached);
     return ThemeConfigSchemaZ.parse(parsed);
-  } catch (error) {
-    console.error('[Skin] Cache inválido:', error);
+  } catch {
     return null;
   }
 }
@@ -59,8 +58,8 @@ function saveToCache(config: ThemeConfig): void {
   try {
     localStorage.setItem(CACHE_KEY, JSON.stringify(config));
     localStorage.setItem(CACHE_TIMESTAMP_KEY, Date.now().toString());
-  } catch (error) {
-    console.error('[Skin] Erro ao salvar cache:', error);
+  } catch {
+    // ignore cache write errors
   }
 }
 
@@ -103,7 +102,6 @@ export async function loadSkin(nicheId: string): Promise<ThemeConfig> {
   // Tenta cache primeiro
   const cached = loadFromCache();
   if (cached && cached.metadata.nicheId === nicheId) {
-    console.log(`[Skin] Usando cache: ${nicheId}`);
     return cached;
   }
   
@@ -111,14 +109,10 @@ export async function loadSkin(nicheId: string): Promise<ThemeConfig> {
   try {
     const config = await loadSkinFile(nicheId);
     saveToCache(config);
-    console.log(`[Skin] Carregada: ${nicheId}`);
     return config;
   } catch (error) {
-    console.error(`[Skin] Erro ao carregar "${nicheId}":`, error);
-    
     // Fallback para skin padrão
     if (nicheId !== DEFAULT_NICHE) {
-      console.warn(`[Skin] Usando fallback: ${DEFAULT_NICHE}`);
       const fallback = await loadSkinFile(DEFAULT_NICHE);
       saveToCache(fallback);
       return fallback;
@@ -237,7 +231,6 @@ export function applyColors(colors: ThemeConfig['colors']): void {
     if (cssVar) {
       const hslValue = hexToHSL(hexValue);
       root.style.setProperty(cssVar, hslValue);
-      console.log(`[Skin] Aplicando ${cssVar}: ${hslValue} (de ${hexValue})`);
     }
   });
   
@@ -249,8 +242,6 @@ export function applyColors(colors: ThemeConfig['colors']): void {
   
   // Ring usa a cor primária
   root.style.setProperty('--ring', primaryHSL);
-  
-  // Card usa o background
   root.style.setProperty('--card', backgroundHSL);
   root.style.setProperty('--card-foreground', textHSL);
   
@@ -270,8 +261,6 @@ export function applyColors(colors: ThemeConfig['colors']): void {
   
   // Accent foreground usa o background (contraste com accent)
   root.style.setProperty('--accent-foreground', backgroundHSL);
-  
-  console.log('[Skin] Cores derivadas aplicadas');
 }
 
 /**
