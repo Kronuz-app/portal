@@ -1,0 +1,14 @@
+{
+	"folders": [
+		{
+			"path": "../../trinity-scheduler-core"
+		},
+		{
+			"path": ".."
+		},
+		{
+			"path": "../../trinity-scheduler-admin"
+		}
+	],
+	"settings": {}
+}
