@@ -218,9 +218,12 @@ export default function App() {
     return <SlugNotFoundError />;
   }
 
-  // Se não tem slug, exibe home page
+  // Se não tem slug (raiz kronuz.app), redireciona para o admin
   if (!hasSlug) {
-    return <HomePage />;
+    const ref = new URLSearchParams(window.location.search).get("ref");
+    const dest = "https://admin.kronuz.app" + (ref ? "/?ref=" + encodeURIComponent(ref) : "/");
+    window.location.replace(dest);
+    return null;
   }
 
   return (
