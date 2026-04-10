@@ -5,6 +5,7 @@ import { decodeShopId } from "./lib/api";
 import { extractSlugFromSubdomain, resolveSlug, SlugNotFoundError } from "./services/slugResolver";
 import { saveUnitInfo, hasCachedUnitInfo, SHOP_ID_KEY } from "./hooks/useShop";import { useMetaTags } from "./hooks/useMetaTags";
 import { SkinProvider } from "./contexts/SkinContext";
+import { usePwaIcons } from "./hooks/usePwaIcons";
 import { HomePage } from "./pages/HomePage";
 import { LoginPage } from "./pages/LoginPage";
 import { BookingPage } from "./pages/BookingPage";
@@ -39,6 +40,8 @@ function AppRoutes() {
   const loginFromUrl = useAuthStore((s) => s.loginFromUrl);
   const logout = useAuthStore((s) => s.logout);
   const currentClientId = useAuthStore((s) => s.clientId);
+
+  usePwaIcons();
 
   // Extrai os parâmetros fora do useEffect para usá-los como dependências
   const clientIdParam = searchParams.get("clientId");
